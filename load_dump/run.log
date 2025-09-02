@@ -1,0 +1,1671 @@
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::detail::OpToOpPassAdaptor)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::CallGraph)
+** Replace : 'arith.constant'(0x20866940)
+** Modified: 'arith.muli'(0x2072fe90)
+** Modified: 'arith.extsi'(0x20866a40)
+** Erase   : 'arith.constant'(0x20866940)
+** Replace : 'arith.constant'(0x20869710)
+** Erase   : 'arith.constant'(0x20869710)
+** Replace : 'arith.constant'(0x208697a0)
+** Erase   : 'arith.constant'(0x208697a0)
+** Replace : 'arith.constant'(0x2086e9f0)
+** Erase   : 'arith.constant'(0x2086e9f0)
+
+//===-------------------------------------------===//
+Processing operation : 'tt.get_program_id'(0x20802980) {
+  %9 = "tt.get_program_id"() <{axis = 0 : i32}> : () -> i32
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x208668d0) {
+  %8 = "arith.constant"() <{value = 32 : i32}> : () -> i32
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.muli'(0x2072fe90) {
+  %16 = "arith.muli"(%9, %8) <{overflowFlags = #arith.overflow<none>}> : (i32, i32) -> i32
+
+
+  * Pattern (anonymous namespace)::MulIMulIConstant : 'arith.muli -> (arith.constant, arith.muli)' {
+Trying to match "(anonymous namespace)::MulIMulIConstant"
+    ** Match Failure : castedOp1 is not ::mlir::arith::MulIOp type
+"(anonymous namespace)::MulIMulIConstant" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.extsi'(0x20866a40) {
+  %11 = "arith.extsi"(%8) : (i32) -> i64
+
+} -> success : operation was folded
+//===-------------------------------------------===//
+** Insert  : 'arith.constant'(0x2086e9f0)
+** Replace : 'arith.extsi'(0x20866a40)
+** Modified: 'arith.muli'(0x207cc8d0)
+** Erase   : 'arith.extsi'(0x20866a40)
+// *** IR Dump After Successful Folding ***
+tt.func public @load(%arg0: !tt.ptr<f32> {tt.divisibility = 16 : i32}, %arg1: !tt.ptr<i32> {tt.divisibility = 16 : i32}, %arg2: !tt.ptr<f32> {tt.divisibility = 16 : i32}, %arg3: i32 {tt.divisibility = 16 : i32}) attributes {noinline = false} {
+  %cst = arith.constant dense<2.000000e+00> : tensor<32xf32>
+  %cst_0 = arith.constant 2.000000e+00 : f32
+  %cst_1 = arith.constant dense<0.000000e+00> : tensor<32xf32>
+  %cst_2 = arith.constant 0.000000e+00 : f32
+  %cst_3 = arith.constant dense<-2147483648> : tensor<32xi64>
+  %cst_4 = arith.constant dense<2147483647> : tensor<32xi64>
+  %c-2147483648_i64 = arith.constant -2147483648 : i64
+  %c2147483647_i64 = arith.constant 2147483647 : i64
+  %c32_i32 = arith.constant 32 : i32
+  %0 = tt.get_program_id x : i32
+  %1 = arith.extsi %0 : i32 to i64
+  %c32_i64 = arith.constant 32 : i64
+  %2 = arith.muli %1, %c32_i64 : i64
+  %3 = arith.cmpi sle, %2, %c2147483647_i64 : i64
+  %4 = arith.cmpi sge, %2, %c-2147483648_i64 : i64
+  %5 = arith.andi %3, %4 : i1
+  %6 = arith.muli %0, %c32_i32 : i32
+  %7 = tt.make_range {end = 32 : i32, start = 0 : i32} : tensor<32xi32>
+  %8 = tt.splat %6 : i32 -> tensor<32xi32>
+  %9 = arith.extsi %8 : tensor<32xi32> to tensor<32xi64>
+  %10 = arith.extsi %7 : tensor<32xi32> to tensor<32xi64>
+  %11 = arith.addi %9, %10 : tensor<32xi64>
+  %12 = arith.cmpi sle, %11, %cst_4 : tensor<32xi64>
+  %13 = arith.cmpi sge, %11, %cst_3 : tensor<32xi64>
+  %14 = arith.andi %12, %13 : tensor<32xi1>
+  %15 = arith.addi %8, %7 : tensor<32xi32>
+  %16 = tt.splat %arg3 : i32 -> tensor<32xi32>
+  %17 = arith.cmpi slt, %15, %16 : tensor<32xi32>
+  %18 = tt.splat %arg0 : !tt.ptr<f32> -> tensor<32x!tt.ptr<f32>>
+  %19 = tt.addptr %18, %15 : tensor<32x!tt.ptr<f32>>, tensor<32xi32>
+  %20 = tt.load %19, %17, %cst_1 : tensor<32x!tt.ptr<f32>>
+  %21 = arith.mulf %20, %cst : tensor<32xf32>
+  %22 = tt.splat %arg2 : !tt.ptr<f32> -> tensor<32x!tt.ptr<f32>>
+  %23 = tt.addptr %22, %15 : tensor<32x!tt.ptr<f32>>, tensor<32xi32>
+  tt.store %23, %21, %17 : tensor<32x!tt.ptr<f32>>
+  tt.return
+}
+
+
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x208668d0) {
+  %8 = "arith.constant"() <{value = 32 : i32}> : () -> i32
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x2086e9f0) {
+  %11 = "arith.constant"() <{value = 32 : i64}> : () -> i64
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.extsi'(0x208669b0) {
+  %10 = "arith.extsi"(%9) : (i32) -> i64
+
+
+  * Pattern (anonymous namespace)::ExtSIOfExtUI : 'arith.extsi -> (arith.extui)' {
+Trying to match "(anonymous namespace)::ExtSIOfExtUI"
+    ** Match Failure : castedOp1 is not ::mlir::arith::ExtUIOp type
+"(anonymous namespace)::ExtSIOfExtUI" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.muli'(0x207cc8d0) {
+  %12 = "arith.muli"(%10, %11) <{overflowFlags = #arith.overflow<none>}> : (i64, i64) -> i64
+
+
+  * Pattern (anonymous namespace)::MulIMulIConstant : 'arith.muli -> (arith.constant, arith.muli)' {
+Trying to match "(anonymous namespace)::MulIMulIConstant"
+    ** Match Failure : castedOp1 is not ::mlir::arith::MulIOp type
+"(anonymous namespace)::MulIMulIConstant" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x20867830) {
+  %7 = "arith.constant"() <{value = 2147483647 : i64}> : () -> i64
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x20867d60) {
+  %6 = "arith.constant"() <{value = -2147483648 : i64}> : () -> i64
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.cmpi'(0x207df870) {
+  %13 = "arith.cmpi"(%12, %7) <{predicate = 3 : i64}> : (i64, i64) -> i1
+
+
+  * Pattern (anonymous namespace)::CmpIExtSI : 'arith.cmpi -> (arith.cmpi)' {
+Trying to match "(anonymous namespace)::CmpIExtSI"
+    ** Match Failure : castedOp1 is not ::mlir::arith::ExtSIOp type
+"(anonymous namespace)::CmpIExtSI" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::CmpIExtUI : 'arith.cmpi -> (arith.cmpi)' {
+Trying to match "(anonymous namespace)::CmpIExtUI"
+    ** Match Failure : castedOp1 is not ::mlir::arith::ExtUIOp type
+"(anonymous namespace)::CmpIExtUI" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.cmpi'(0x207a1240) {
+  %14 = "arith.cmpi"(%12, %6) <{predicate = 5 : i64}> : (i64, i64) -> i1
+
+
+  * Pattern (anonymous namespace)::CmpIExtSI : 'arith.cmpi -> (arith.cmpi)' {
+Trying to match "(anonymous namespace)::CmpIExtSI"
+    ** Match Failure : castedOp1 is not ::mlir::arith::ExtSIOp type
+"(anonymous namespace)::CmpIExtSI" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::CmpIExtUI : 'arith.cmpi -> (arith.cmpi)' {
+Trying to match "(anonymous namespace)::CmpIExtUI"
+    ** Match Failure : castedOp1 is not ::mlir::arith::ExtUIOp type
+"(anonymous namespace)::CmpIExtUI" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.andi'(0x207a57c0) {
+  %15 = "arith.andi"(%13, %14) : (i1, i1) -> i1
+
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::HasRecursiveMemoryEffects<Empty>)
+  ** Erase   : 'arith.andi'(0x207a57c0)
+} -> success : operation is trivially dead
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.cmpi'(0x207a1240) {
+  %14 = "arith.cmpi"(%12, %6) <{predicate = 5 : i64}> : (i64, i64) -> i1
+
+  ** Erase   : 'arith.cmpi'(0x207a1240)
+} -> success : operation is trivially dead
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x20867d60) {
+  %6 = "arith.constant"() <{value = -2147483648 : i64}> : () -> i64
+
+  ** Erase   : 'arith.constant'(0x20867d60)
+} -> success : operation is trivially dead
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.muli'(0x207cc8d0) {
+  %11 = "arith.muli"(%9, %10) <{overflowFlags = #arith.overflow<none>}> : (i64, i64) -> i64
+
+
+  * Pattern (anonymous namespace)::MulIMulIConstant : 'arith.muli -> (arith.constant, arith.muli)' {
+Trying to match "(anonymous namespace)::MulIMulIConstant"
+    ** Match Failure : castedOp1 is not ::mlir::arith::MulIOp type
+"(anonymous namespace)::MulIMulIConstant" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.cmpi'(0x207df870) {
+  %12 = "arith.cmpi"(%11, %6) <{predicate = 3 : i64}> : (i64, i64) -> i1
+
+  ** Erase   : 'arith.cmpi'(0x207df870)
+} -> success : operation is trivially dead
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x20867830) {
+  %6 = "arith.constant"() <{value = 2147483647 : i64}> : () -> i64
+
+  ** Erase   : 'arith.constant'(0x20867830)
+} -> success : operation is trivially dead
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.muli'(0x207cc8d0) {
+  %10 = "arith.muli"(%8, %9) <{overflowFlags = #arith.overflow<none>}> : (i64, i64) -> i64
+
+  ** Erase   : 'arith.muli'(0x207cc8d0)
+} -> success : operation is trivially dead
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x2086e9f0) {
+  %9 = "arith.constant"() <{value = 32 : i64}> : () -> i64
+
+  ** Erase   : 'arith.constant'(0x2086e9f0)
+} -> success : operation is trivially dead
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.extsi'(0x208669b0) {
+  %8 = "arith.extsi"(%7) : (i32) -> i64
+
+  ** Erase   : 'arith.extsi'(0x208669b0)
+} -> success : operation is trivially dead
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.get_program_id'(0x20802980) {
+  %7 = "tt.get_program_id"() <{axis = 0 : i32}> : () -> i32
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.make_range'(0x20869070) {
+  %9 = "tt.make_range"() <{end = 32 : i32, start = 0 : i32}> : () -> tensor<32xi32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x208690e0) {
+  %10 = "tt.splat"(%8) : (i32) -> tensor<32xi32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.extsi'(0x208695f0) {
+  %11 = "arith.extsi"(%10) : (tensor<32xi32>) -> tensor<32xi64>
+
+
+  * Pattern (anonymous namespace)::ExtSIOfExtUI : 'arith.extsi -> (arith.extui)' {
+Trying to match "(anonymous namespace)::ExtSIOfExtUI"
+    ** Match Failure : castedOp1 is not ::mlir::arith::ExtUIOp type
+"(anonymous namespace)::ExtSIOfExtUI" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.extsi'(0x20869680) {
+  %12 = "arith.extsi"(%9) : (tensor<32xi32>) -> tensor<32xi64>
+
+
+  * Pattern (anonymous namespace)::ExtSIOfExtUI : 'arith.extsi -> (arith.extui)' {
+Trying to match "(anonymous namespace)::ExtSIOfExtUI"
+    ** Match Failure : castedOp1 is not ::mlir::arith::ExtUIOp type
+"(anonymous namespace)::ExtSIOfExtUI" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.addi'(0x20700290) {
+  %13 = "arith.addi"(%11, %12) <{overflowFlags = #arith.overflow<none>}> : (tensor<32xi64>, tensor<32xi64>) -> tensor<32xi64>
+
+
+  * Pattern (anonymous namespace)::AddIAddConstant : 'arith.addi -> (arith.addi, arith.constant)' {
+Trying to match "(anonymous namespace)::AddIAddConstant"
+    ** Match Failure : castedOp1 is not ::mlir::arith::AddIOp type
+"(anonymous namespace)::AddIAddConstant" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::AddISubConstantRHS : 'arith.addi -> (arith.addi, arith.constant)' {
+Trying to match "(anonymous namespace)::AddISubConstantRHS"
+    ** Match Failure : castedOp1 is not ::mlir::arith::SubIOp type
+"(anonymous namespace)::AddISubConstantRHS" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::AddISubConstantLHS : 'arith.addi -> (arith.constant, arith.subi)' {
+Trying to match "(anonymous namespace)::AddISubConstantLHS"
+    ** Match Failure : castedOp1 is not ::mlir::arith::SubIOp type
+"(anonymous namespace)::AddISubConstantLHS" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::AddIMulNegativeOneRhs : 'arith.addi -> (arith.subi)' {
+Trying to match "(anonymous namespace)::AddIMulNegativeOneRhs"
+    ** Match Failure : castedOp1 is not ::mlir::arith::MulIOp type
+"(anonymous namespace)::AddIMulNegativeOneRhs" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::AddIMulNegativeOneLhs : 'arith.addi -> (arith.subi)' {
+Trying to match "(anonymous namespace)::AddIMulNegativeOneLhs"
+    ** Match Failure : castedOp1 is not ::mlir::arith::MulIOp type
+"(anonymous namespace)::AddIMulNegativeOneLhs" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x2086a220) {
+  %5 = "arith.constant"() <{value = dense<2147483647> : tensor<32xi64>}> : () -> tensor<32xi64>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.cmpi'(0x2076f3b0) {
+  %14 = "arith.cmpi"(%13, %5) <{predicate = 3 : i64}> : (tensor<32xi64>, tensor<32xi64>) -> tensor<32xi1>
+
+
+  * Pattern (anonymous namespace)::CmpIExtSI : 'arith.cmpi -> (arith.cmpi)' {
+Trying to match "(anonymous namespace)::CmpIExtSI"
+    ** Match Failure : castedOp1 is not ::mlir::arith::ExtSIOp type
+"(anonymous namespace)::CmpIExtSI" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::CmpIExtUI : 'arith.cmpi -> (arith.cmpi)' {
+Trying to match "(anonymous namespace)::CmpIExtUI"
+    ** Match Failure : castedOp1 is not ::mlir::arith::ExtUIOp type
+"(anonymous namespace)::CmpIExtUI" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x2086a750) {
+  %4 = "arith.constant"() <{value = dense<-2147483648> : tensor<32xi64>}> : () -> tensor<32xi64>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.cmpi'(0x2086a7c0) {
+  %15 = "arith.cmpi"(%13, %4) <{predicate = 5 : i64}> : (tensor<32xi64>, tensor<32xi64>) -> tensor<32xi1>
+
+
+  * Pattern (anonymous namespace)::CmpIExtSI : 'arith.cmpi -> (arith.cmpi)' {
+Trying to match "(anonymous namespace)::CmpIExtSI"
+    ** Match Failure : castedOp1 is not ::mlir::arith::ExtSIOp type
+"(anonymous namespace)::CmpIExtSI" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::CmpIExtUI : 'arith.cmpi -> (arith.cmpi)' {
+Trying to match "(anonymous namespace)::CmpIExtUI"
+    ** Match Failure : castedOp1 is not ::mlir::arith::ExtUIOp type
+"(anonymous namespace)::CmpIExtUI" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.andi'(0x2086a870) {
+  %16 = "arith.andi"(%14, %15) : (tensor<32xi1>, tensor<32xi1>) -> tensor<32xi1>
+
+  ** Erase   : 'arith.andi'(0x2086a870)
+} -> success : operation is trivially dead
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.cmpi'(0x2086a7c0) {
+  %15 = "arith.cmpi"(%13, %4) <{predicate = 5 : i64}> : (tensor<32xi64>, tensor<32xi64>) -> tensor<32xi1>
+
+  ** Erase   : 'arith.cmpi'(0x2086a7c0)
+} -> success : operation is trivially dead
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x2086a750) {
+  %4 = "arith.constant"() <{value = dense<-2147483648> : tensor<32xi64>}> : () -> tensor<32xi64>
+
+  ** Erase   : 'arith.constant'(0x2086a750)
+} -> success : operation is trivially dead
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.addi'(0x20700290) {
+  %12 = "arith.addi"(%10, %11) <{overflowFlags = #arith.overflow<none>}> : (tensor<32xi64>, tensor<32xi64>) -> tensor<32xi64>
+
+
+  * Pattern (anonymous namespace)::AddIAddConstant : 'arith.addi -> (arith.addi, arith.constant)' {
+Trying to match "(anonymous namespace)::AddIAddConstant"
+    ** Match Failure : castedOp1 is not ::mlir::arith::AddIOp type
+"(anonymous namespace)::AddIAddConstant" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::AddISubConstantRHS : 'arith.addi -> (arith.addi, arith.constant)' {
+Trying to match "(anonymous namespace)::AddISubConstantRHS"
+    ** Match Failure : castedOp1 is not ::mlir::arith::SubIOp type
+"(anonymous namespace)::AddISubConstantRHS" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::AddISubConstantLHS : 'arith.addi -> (arith.constant, arith.subi)' {
+Trying to match "(anonymous namespace)::AddISubConstantLHS"
+    ** Match Failure : castedOp1 is not ::mlir::arith::SubIOp type
+"(anonymous namespace)::AddISubConstantLHS" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::AddIMulNegativeOneRhs : 'arith.addi -> (arith.subi)' {
+Trying to match "(anonymous namespace)::AddIMulNegativeOneRhs"
+    ** Match Failure : castedOp1 is not ::mlir::arith::MulIOp type
+"(anonymous namespace)::AddIMulNegativeOneRhs" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::AddIMulNegativeOneLhs : 'arith.addi -> (arith.subi)' {
+Trying to match "(anonymous namespace)::AddIMulNegativeOneLhs"
+    ** Match Failure : castedOp1 is not ::mlir::arith::MulIOp type
+"(anonymous namespace)::AddIMulNegativeOneLhs" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.cmpi'(0x2076f3b0) {
+  %13 = "arith.cmpi"(%12, %4) <{predicate = 3 : i64}> : (tensor<32xi64>, tensor<32xi64>) -> tensor<32xi1>
+
+  ** Erase   : 'arith.cmpi'(0x2076f3b0)
+} -> success : operation is trivially dead
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x2086a220) {
+  %4 = "arith.constant"() <{value = dense<2147483647> : tensor<32xi64>}> : () -> tensor<32xi64>
+
+  ** Erase   : 'arith.constant'(0x2086a220)
+} -> success : operation is trivially dead
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.addi'(0x20700290) {
+  %11 = "arith.addi"(%9, %10) <{overflowFlags = #arith.overflow<none>}> : (tensor<32xi64>, tensor<32xi64>) -> tensor<32xi64>
+
+  ** Erase   : 'arith.addi'(0x20700290)
+} -> success : operation is trivially dead
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.extsi'(0x20869680) {
+  %10 = "arith.extsi"(%7) : (tensor<32xi32>) -> tensor<32xi64>
+
+  ** Erase   : 'arith.extsi'(0x20869680)
+} -> success : operation is trivially dead
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.make_range'(0x20869070) {
+  %7 = "tt.make_range"() <{end = 32 : i32, start = 0 : i32}> : () -> tensor<32xi32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.extsi'(0x208695f0) {
+  %9 = "arith.extsi"(%8) : (tensor<32xi32>) -> tensor<32xi64>
+
+  ** Erase   : 'arith.extsi'(0x208695f0)
+} -> success : operation is trivially dead
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x208690e0) {
+  %8 = "tt.splat"(%6) : (i32) -> tensor<32xi32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.addi'(0x2086a920) {
+  %9 = "arith.addi"(%8, %7) <{overflowFlags = #arith.overflow<none>}> : (tensor<32xi32>, tensor<32xi32>) -> tensor<32xi32>
+
+
+  * Pattern (anonymous namespace)::AddIAddConstant : 'arith.addi -> (arith.addi, arith.constant)' {
+Trying to match "(anonymous namespace)::AddIAddConstant"
+    ** Match Failure : castedOp1 is not ::mlir::arith::AddIOp type
+"(anonymous namespace)::AddIAddConstant" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::AddISubConstantRHS : 'arith.addi -> (arith.addi, arith.constant)' {
+Trying to match "(anonymous namespace)::AddISubConstantRHS"
+    ** Match Failure : castedOp1 is not ::mlir::arith::SubIOp type
+"(anonymous namespace)::AddISubConstantRHS" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::AddISubConstantLHS : 'arith.addi -> (arith.constant, arith.subi)' {
+Trying to match "(anonymous namespace)::AddISubConstantLHS"
+    ** Match Failure : castedOp1 is not ::mlir::arith::SubIOp type
+"(anonymous namespace)::AddISubConstantLHS" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::AddIMulNegativeOneRhs : 'arith.addi -> (arith.subi)' {
+Trying to match "(anonymous namespace)::AddIMulNegativeOneRhs"
+    ** Match Failure : castedOp1 is not ::mlir::arith::MulIOp type
+"(anonymous namespace)::AddIMulNegativeOneRhs" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::AddIMulNegativeOneLhs : 'arith.addi -> (arith.subi)' {
+Trying to match "(anonymous namespace)::AddIMulNegativeOneLhs"
+    ** Match Failure : castedOp1 is not ::mlir::arith::MulIOp type
+"(anonymous namespace)::AddIMulNegativeOneLhs" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x208698d0) {
+  %10 = "tt.splat"(%arg3) : (i32) -> tensor<32xi32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.cmpi'(0x2086b2d0) {
+  %11 = "arith.cmpi"(%9, %10) <{predicate = 2 : i64}> : (tensor<32xi32>, tensor<32xi32>) -> tensor<32xi1>
+
+
+  * Pattern (anonymous namespace)::CmpIExtSI : 'arith.cmpi -> (arith.cmpi)' {
+Trying to match "(anonymous namespace)::CmpIExtSI"
+    ** Match Failure : castedOp1 is not ::mlir::arith::ExtSIOp type
+"(anonymous namespace)::CmpIExtSI" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::CmpIExtUI : 'arith.cmpi -> (arith.cmpi)' {
+Trying to match "(anonymous namespace)::CmpIExtUI"
+    ** Match Failure : castedOp1 is not ::mlir::arith::ExtUIOp type
+"(anonymous namespace)::CmpIExtUI" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x2086c7a0) {
+  %12 = "tt.splat"(%arg0) : (!tt.ptr<f32>) -> tensor<32x!tt.ptr<f32>>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.addptr'(0x2086c830) {
+  %13 = "tt.addptr"(%12, %9) : (tensor<32x!tt.ptr<f32>>, tensor<32xi32>) -> tensor<32x!tt.ptr<f32>>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x2086d170) {
+  %3 = "arith.constant"() <{value = 0.000000e+00 : f32}> : () -> f32
+
+  ** Erase   : 'arith.constant'(0x2086d170)
+} -> success : operation is trivially dead
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x2086d6f0) {
+  %2 = "arith.constant"() <{value = dense<0.000000e+00> : tensor<32xf32>}> : () -> tensor<32xf32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.load'(0x20750170) {
+  %13 = "tt.load"(%12, %10, %2) <{boundaryCheck = array<i32>, cache = 1 : i32, evict = 1 : i32, isVolatile = false, operandSegmentSizes = array<i32: 1, 1, 1>}> : (tensor<32x!tt.ptr<f32>>, tensor<32xi1>, tensor<32xf32>) -> tensor<32xf32>
+
+
+  * Pattern mlir::triton::CanonicalizeMaskedLoadPattern : 'tt.load -> ()' {
+Trying to match "mlir::triton::CanonicalizeMaskedLoadPattern"
+"mlir::triton::CanonicalizeMaskedLoadPattern" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x2086e980) {
+  %1 = "arith.constant"() <{value = 2.000000e+00 : f32}> : () -> f32
+
+  ** Erase   : 'arith.constant'(0x2086e980)
+} -> success : operation is trivially dead
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x2086eee0) {
+  %0 = "arith.constant"() <{value = dense<2.000000e+00> : tensor<32xf32>}> : () -> tensor<32xf32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.mulf'(0x2086f810) {
+  %13 = "arith.mulf"(%12, %0) <{fastmath = #arith.fastmath<none>}> : (tensor<32xf32>, tensor<32xf32>) -> tensor<32xf32>
+
+
+  * Pattern (anonymous namespace)::MulFOfNegF : 'arith.mulf -> (arith.mulf)' {
+Trying to match "(anonymous namespace)::MulFOfNegF"
+    ** Match Failure : castedOp1 is not ::mlir::arith::NegFOp type
+"(anonymous namespace)::MulFOfNegF" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x2086d660) {
+  %14 = "tt.splat"(%arg2) : (!tt.ptr<f32>) -> tensor<32x!tt.ptr<f32>>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.addptr'(0x2086f930) {
+  %15 = "tt.addptr"(%14, %7) : (tensor<32x!tt.ptr<f32>>, tensor<32xi32>) -> tensor<32x!tt.ptr<f32>>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.store'(0x2078af70) {
+  "tt.store"(%15, %13, %9) <{boundaryCheck = array<i32>, cache = 1 : i32, evict = 1 : i32}> : (tensor<32x!tt.ptr<f32>>, tensor<32xf32>, tensor<32xi1>) -> ()
+
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::triton::GlobalMemory)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::MemoryEffects::Write)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::MemoryEffects::Allocate)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::MemoryEffects::Read)
+
+  * Pattern mlir::triton::CanonicalizeMaskedStorePattern : 'tt.store -> ()' {
+Trying to match "mlir::triton::CanonicalizeMaskedStorePattern"
+"mlir::triton::CanonicalizeMaskedStorePattern" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.return'(0x207f5260) {
+  "tt.return"() : () -> ()
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x2086eee0) {
+  %0 = "arith.constant"() <{value = dense<2.000000e+00> : tensor<32xf32>}> : () -> tensor<32xf32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x2086d6f0) {
+  %1 = "arith.constant"() <{value = dense<0.000000e+00> : tensor<32xf32>}> : () -> tensor<32xf32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x208668d0) {
+  %2 = "arith.constant"() <{value = 32 : i32}> : () -> i32
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.get_program_id'(0x20802980) {
+  %3 = "tt.get_program_id"() <{axis = 0 : i32}> : () -> i32
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.muli'(0x2072fe90) {
+  %4 = "arith.muli"(%3, %2) <{overflowFlags = #arith.overflow<none>}> : (i32, i32) -> i32
+
+
+  * Pattern (anonymous namespace)::MulIMulIConstant : 'arith.muli -> (arith.constant, arith.muli)' {
+Trying to match "(anonymous namespace)::MulIMulIConstant"
+    ** Match Failure : castedOp1 is not ::mlir::arith::MulIOp type
+"(anonymous namespace)::MulIMulIConstant" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.make_range'(0x20869070) {
+  %5 = "tt.make_range"() <{end = 32 : i32, start = 0 : i32}> : () -> tensor<32xi32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x208690e0) {
+  %6 = "tt.splat"(%4) : (i32) -> tensor<32xi32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.addi'(0x2086a920) {
+  %7 = "arith.addi"(%6, %5) <{overflowFlags = #arith.overflow<none>}> : (tensor<32xi32>, tensor<32xi32>) -> tensor<32xi32>
+
+
+  * Pattern (anonymous namespace)::AddIAddConstant : 'arith.addi -> (arith.addi, arith.constant)' {
+Trying to match "(anonymous namespace)::AddIAddConstant"
+    ** Match Failure : castedOp1 is not ::mlir::arith::AddIOp type
+"(anonymous namespace)::AddIAddConstant" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::AddISubConstantRHS : 'arith.addi -> (arith.addi, arith.constant)' {
+Trying to match "(anonymous namespace)::AddISubConstantRHS"
+    ** Match Failure : castedOp1 is not ::mlir::arith::SubIOp type
+"(anonymous namespace)::AddISubConstantRHS" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::AddISubConstantLHS : 'arith.addi -> (arith.constant, arith.subi)' {
+Trying to match "(anonymous namespace)::AddISubConstantLHS"
+    ** Match Failure : castedOp1 is not ::mlir::arith::SubIOp type
+"(anonymous namespace)::AddISubConstantLHS" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::AddIMulNegativeOneRhs : 'arith.addi -> (arith.subi)' {
+Trying to match "(anonymous namespace)::AddIMulNegativeOneRhs"
+    ** Match Failure : castedOp1 is not ::mlir::arith::MulIOp type
+"(anonymous namespace)::AddIMulNegativeOneRhs" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::AddIMulNegativeOneLhs : 'arith.addi -> (arith.subi)' {
+Trying to match "(anonymous namespace)::AddIMulNegativeOneLhs"
+    ** Match Failure : castedOp1 is not ::mlir::arith::MulIOp type
+"(anonymous namespace)::AddIMulNegativeOneLhs" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x208698d0) {
+  %8 = "tt.splat"(%arg3) : (i32) -> tensor<32xi32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.cmpi'(0x2086b2d0) {
+  %9 = "arith.cmpi"(%7, %8) <{predicate = 2 : i64}> : (tensor<32xi32>, tensor<32xi32>) -> tensor<32xi1>
+
+
+  * Pattern (anonymous namespace)::CmpIExtSI : 'arith.cmpi -> (arith.cmpi)' {
+Trying to match "(anonymous namespace)::CmpIExtSI"
+    ** Match Failure : castedOp1 is not ::mlir::arith::ExtSIOp type
+"(anonymous namespace)::CmpIExtSI" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::CmpIExtUI : 'arith.cmpi -> (arith.cmpi)' {
+Trying to match "(anonymous namespace)::CmpIExtUI"
+    ** Match Failure : castedOp1 is not ::mlir::arith::ExtUIOp type
+"(anonymous namespace)::CmpIExtUI" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x2086c7a0) {
+  %10 = "tt.splat"(%arg0) : (!tt.ptr<f32>) -> tensor<32x!tt.ptr<f32>>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.addptr'(0x2086c830) {
+  %11 = "tt.addptr"(%10, %7) : (tensor<32x!tt.ptr<f32>>, tensor<32xi32>) -> tensor<32x!tt.ptr<f32>>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.load'(0x20750170) {
+  %12 = "tt.load"(%11, %9, %1) <{boundaryCheck = array<i32>, cache = 1 : i32, evict = 1 : i32, isVolatile = false, operandSegmentSizes = array<i32: 1, 1, 1>}> : (tensor<32x!tt.ptr<f32>>, tensor<32xi1>, tensor<32xf32>) -> tensor<32xf32>
+
+
+  * Pattern mlir::triton::CanonicalizeMaskedLoadPattern : 'tt.load -> ()' {
+Trying to match "mlir::triton::CanonicalizeMaskedLoadPattern"
+"mlir::triton::CanonicalizeMaskedLoadPattern" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.mulf'(0x2086f810) {
+  %13 = "arith.mulf"(%12, %0) <{fastmath = #arith.fastmath<none>}> : (tensor<32xf32>, tensor<32xf32>) -> tensor<32xf32>
+
+
+  * Pattern (anonymous namespace)::MulFOfNegF : 'arith.mulf -> (arith.mulf)' {
+Trying to match "(anonymous namespace)::MulFOfNegF"
+    ** Match Failure : castedOp1 is not ::mlir::arith::NegFOp type
+"(anonymous namespace)::MulFOfNegF" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x2086d660) {
+  %14 = "tt.splat"(%arg2) : (!tt.ptr<f32>) -> tensor<32x!tt.ptr<f32>>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.addptr'(0x2086f930) {
+  %15 = "tt.addptr"(%14, %7) : (tensor<32x!tt.ptr<f32>>, tensor<32xi32>) -> tensor<32x!tt.ptr<f32>>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.store'(0x2078af70) {
+  "tt.store"(%15, %13, %9) <{boundaryCheck = array<i32>, cache = 1 : i32, evict = 1 : i32}> : (tensor<32x!tt.ptr<f32>>, tensor<32xf32>, tensor<32xi1>) -> ()
+
+
+  * Pattern mlir::triton::CanonicalizeMaskedStorePattern : 'tt.store -> ()' {
+Trying to match "mlir::triton::CanonicalizeMaskedStorePattern"
+"mlir::triton::CanonicalizeMaskedStorePattern" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.return'(0x207f5260) {
+  "tt.return"() : () -> ()
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::detail::PreservedAnalyses::AllAnalysesType)
+* Inliner: Initial calls in SCC are: {
+}
+* Inliner: Initial calls in SCC are: {
+}
+
+//===-------------------------------------------===//
+Legalizing operation : 'builtin.module'(0x2071a2f0) {
+  * Fold {
+  } -> FAILURE : unable to fold
+} -> FAILURE : no matched legalization pattern
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Legalizing operation : 'tt.func'(0x20832760) {
+} -> SUCCESS : operation marked legal by the target
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Legalizing operation : 'arith.constant'(0x2086eee0) {
+  %0 = "arith.constant"() <{value = dense<2.000000e+00> : tensor<32xf32>}> : () -> tensor<32xf32>
+
+} -> SUCCESS : operation marked legal by the target
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Legalizing operation : 'arith.constant'(0x2086d6f0) {
+  %1 = "arith.constant"() <{value = dense<0.000000e+00> : tensor<32xf32>}> : () -> tensor<32xf32>
+
+} -> SUCCESS : operation marked legal by the target
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Legalizing operation : 'arith.constant'(0x208668d0) {
+  %2 = "arith.constant"() <{value = 32 : i32}> : () -> i32
+
+} -> SUCCESS : operation marked legal by the target
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Legalizing operation : 'tt.get_program_id'(0x20802980) {
+  %3 = "tt.get_program_id"() <{axis = 0 : i32}> : () -> i32
+
+} -> SUCCESS : operation marked legal by the target
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Legalizing operation : 'arith.muli'(0x2072fe90) {
+  %4 = "arith.muli"(%3, %2) <{overflowFlags = #arith.overflow<none>}> : (i32, i32) -> i32
+
+} -> SUCCESS : operation marked legal by the target
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Legalizing operation : 'tt.make_range'(0x20869070) {
+  %5 = "tt.make_range"() <{end = 32 : i32, start = 0 : i32}> : () -> tensor<32xi32>
+
+} -> SUCCESS : operation marked legal by the target
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Legalizing operation : 'tt.splat'(0x208690e0) {
+  %6 = "tt.splat"(%4) : (i32) -> tensor<32xi32>
+
+} -> SUCCESS : operation marked legal by the target
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Legalizing operation : 'arith.addi'(0x2086a920) {
+  %7 = "arith.addi"(%6, %5) <{overflowFlags = #arith.overflow<none>}> : (tensor<32xi32>, tensor<32xi32>) -> tensor<32xi32>
+
+} -> SUCCESS : operation marked legal by the target
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Legalizing operation : 'tt.splat'(0x208698d0) {
+  %8 = "tt.splat"(%arg3) : (i32) -> tensor<32xi32>
+
+} -> SUCCESS : operation marked legal by the target
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Legalizing operation : 'arith.cmpi'(0x2086b2d0) {
+  %9 = "arith.cmpi"(%7, %8) <{predicate = 2 : i64}> : (tensor<32xi32>, tensor<32xi32>) -> tensor<32xi1>
+
+} -> SUCCESS : operation marked legal by the target
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Legalizing operation : 'tt.splat'(0x2086c7a0) {
+  %10 = "tt.splat"(%arg0) : (!tt.ptr<f32>) -> tensor<32x!tt.ptr<f32>>
+
+} -> SUCCESS : operation marked legal by the target
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Legalizing operation : 'tt.addptr'(0x2086c830) {
+  %11 = "tt.addptr"(%10, %7) : (tensor<32x!tt.ptr<f32>>, tensor<32xi32>) -> tensor<32x!tt.ptr<f32>>
+
+} -> SUCCESS : operation marked legal by the target
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Legalizing operation : 'tt.load'(0x20750170) {
+  %12 = "tt.load"(%11, %9, %1) <{boundaryCheck = array<i32>, cache = 1 : i32, evict = 1 : i32, isVolatile = false, operandSegmentSizes = array<i32: 1, 1, 1>}> : (tensor<32x!tt.ptr<f32>>, tensor<32xi1>, tensor<32xf32>) -> tensor<32xf32>
+
+} -> SUCCESS : operation marked legal by the target
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Legalizing operation : 'arith.mulf'(0x2086f810) {
+  %13 = "arith.mulf"(%12, %0) <{fastmath = #arith.fastmath<none>}> : (tensor<32xf32>, tensor<32xf32>) -> tensor<32xf32>
+
+} -> SUCCESS : operation marked legal by the target
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Legalizing operation : 'tt.splat'(0x2086d660) {
+  %14 = "tt.splat"(%arg2) : (!tt.ptr<f32>) -> tensor<32x!tt.ptr<f32>>
+
+} -> SUCCESS : operation marked legal by the target
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Legalizing operation : 'tt.addptr'(0x2086f930) {
+  %15 = "tt.addptr"(%14, %7) : (tensor<32x!tt.ptr<f32>>, tensor<32xi32>) -> tensor<32x!tt.ptr<f32>>
+
+} -> SUCCESS : operation marked legal by the target
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Legalizing operation : 'tt.store'(0x2078af70) {
+  "tt.store"(%15, %13, %9) <{boundaryCheck = array<i32>, cache = 1 : i32, evict = 1 : i32}> : (tensor<32x!tt.ptr<f32>>, tensor<32xf32>, tensor<32xi1>) -> ()
+
+} -> SUCCESS : operation marked legal by the target
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Legalizing operation : 'tt.return'(0x207f5260) {
+  "tt.return"() : () -> ()
+
+} -> SUCCESS : operation marked legal by the target
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.func'(0x20832760) {
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x2086eee0) {
+  %0 = "arith.constant"() <{value = dense<2.000000e+00> : tensor<32xf32>}> : () -> tensor<32xf32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x2086d6f0) {
+  %1 = "arith.constant"() <{value = dense<0.000000e+00> : tensor<32xf32>}> : () -> tensor<32xf32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x208668d0) {
+  %2 = "arith.constant"() <{value = 32 : i32}> : () -> i32
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.get_program_id'(0x20802980) {
+  %3 = "tt.get_program_id"() <{axis = 0 : i32}> : () -> i32
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.muli'(0x2072fe90) {
+  %4 = "arith.muli"(%3, %2) <{overflowFlags = #arith.overflow<none>}> : (i32, i32) -> i32
+
+
+  * Pattern (anonymous namespace)::MulIMulIConstant : 'arith.muli -> (arith.constant, arith.muli)' {
+Trying to match "(anonymous namespace)::MulIMulIConstant"
+    ** Match Failure : castedOp1 is not ::mlir::arith::MulIOp type
+"(anonymous namespace)::MulIMulIConstant" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.make_range'(0x20869070) {
+  %5 = "tt.make_range"() <{end = 32 : i32, start = 0 : i32}> : () -> tensor<32xi32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x208690e0) {
+  %6 = "tt.splat"(%4) : (i32) -> tensor<32xi32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.addi'(0x2086a920) {
+  %7 = "arith.addi"(%6, %5) <{overflowFlags = #arith.overflow<none>}> : (tensor<32xi32>, tensor<32xi32>) -> tensor<32xi32>
+
+
+  * Pattern (anonymous namespace)::AddIAddConstant : 'arith.addi -> (arith.addi, arith.constant)' {
+Trying to match "(anonymous namespace)::AddIAddConstant"
+    ** Match Failure : castedOp1 is not ::mlir::arith::AddIOp type
+"(anonymous namespace)::AddIAddConstant" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::AddISubConstantRHS : 'arith.addi -> (arith.addi, arith.constant)' {
+Trying to match "(anonymous namespace)::AddISubConstantRHS"
+    ** Match Failure : castedOp1 is not ::mlir::arith::SubIOp type
+"(anonymous namespace)::AddISubConstantRHS" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::AddISubConstantLHS : 'arith.addi -> (arith.constant, arith.subi)' {
+Trying to match "(anonymous namespace)::AddISubConstantLHS"
+    ** Match Failure : castedOp1 is not ::mlir::arith::SubIOp type
+"(anonymous namespace)::AddISubConstantLHS" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::AddIMulNegativeOneRhs : 'arith.addi -> (arith.subi)' {
+Trying to match "(anonymous namespace)::AddIMulNegativeOneRhs"
+    ** Match Failure : castedOp1 is not ::mlir::arith::MulIOp type
+"(anonymous namespace)::AddIMulNegativeOneRhs" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::AddIMulNegativeOneLhs : 'arith.addi -> (arith.subi)' {
+Trying to match "(anonymous namespace)::AddIMulNegativeOneLhs"
+    ** Match Failure : castedOp1 is not ::mlir::arith::MulIOp type
+"(anonymous namespace)::AddIMulNegativeOneLhs" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x208698d0) {
+  %8 = "tt.splat"(%arg3) : (i32) -> tensor<32xi32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.cmpi'(0x2086b2d0) {
+  %9 = "arith.cmpi"(%7, %8) <{predicate = 2 : i64}> : (tensor<32xi32>, tensor<32xi32>) -> tensor<32xi1>
+
+
+  * Pattern (anonymous namespace)::CmpIExtSI : 'arith.cmpi -> (arith.cmpi)' {
+Trying to match "(anonymous namespace)::CmpIExtSI"
+    ** Match Failure : castedOp1 is not ::mlir::arith::ExtSIOp type
+"(anonymous namespace)::CmpIExtSI" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern (anonymous namespace)::CmpIExtUI : 'arith.cmpi -> (arith.cmpi)' {
+Trying to match "(anonymous namespace)::CmpIExtUI"
+    ** Match Failure : castedOp1 is not ::mlir::arith::ExtUIOp type
+"(anonymous namespace)::CmpIExtUI" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x2086c7a0) {
+  %10 = "tt.splat"(%arg0) : (!tt.ptr<f32>) -> tensor<32x!tt.ptr<f32>>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.addptr'(0x2086c830) {
+  %11 = "tt.addptr"(%10, %7) : (tensor<32x!tt.ptr<f32>>, tensor<32xi32>) -> tensor<32x!tt.ptr<f32>>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.load'(0x20750170) {
+  %12 = "tt.load"(%11, %9, %1) <{boundaryCheck = array<i32>, cache = 1 : i32, evict = 1 : i32, isVolatile = false, operandSegmentSizes = array<i32: 1, 1, 1>}> : (tensor<32x!tt.ptr<f32>>, tensor<32xi1>, tensor<32xf32>) -> tensor<32xf32>
+
+
+  * Pattern mlir::triton::CanonicalizeMaskedLoadPattern : 'tt.load -> ()' {
+Trying to match "mlir::triton::CanonicalizeMaskedLoadPattern"
+"mlir::triton::CanonicalizeMaskedLoadPattern" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.mulf'(0x2086f810) {
+  %13 = "arith.mulf"(%12, %0) <{fastmath = #arith.fastmath<none>}> : (tensor<32xf32>, tensor<32xf32>) -> tensor<32xf32>
+
+
+  * Pattern (anonymous namespace)::MulFOfNegF : 'arith.mulf -> (arith.mulf)' {
+Trying to match "(anonymous namespace)::MulFOfNegF"
+    ** Match Failure : castedOp1 is not ::mlir::arith::NegFOp type
+"(anonymous namespace)::MulFOfNegF" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x2086d660) {
+  %14 = "tt.splat"(%arg2) : (!tt.ptr<f32>) -> tensor<32x!tt.ptr<f32>>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.addptr'(0x2086f930) {
+  %15 = "tt.addptr"(%14, %7) : (tensor<32x!tt.ptr<f32>>, tensor<32xi32>) -> tensor<32x!tt.ptr<f32>>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.store'(0x2078af70) {
+  "tt.store"(%15, %13, %9) <{boundaryCheck = array<i32>, cache = 1 : i32, evict = 1 : i32}> : (tensor<32x!tt.ptr<f32>>, tensor<32xf32>, tensor<32xi1>) -> ()
+
+
+  * Pattern mlir::triton::CanonicalizeMaskedStorePattern : 'tt.store -> ()' {
+Trying to match "mlir::triton::CanonicalizeMaskedStorePattern"
+"mlir::triton::CanonicalizeMaskedStorePattern" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.return'(0x207f5260) {
+  "tt.return"() : () -> ()
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.return'(0x207f5260) {
+  "tt.return"() : () -> ()
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.store'(0x2078af70) {
+  "tt.store"(%15, %13, %9) <{boundaryCheck = array<i32>, cache = 1 : i32, evict = 1 : i32}> : (tensor<32x!tt.ptr<f32>>, tensor<32xf32>, tensor<32xi1>) -> ()
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.addptr'(0x2086f930) {
+  %15 = "tt.addptr"(%14, %7) : (tensor<32x!tt.ptr<f32>>, tensor<32xi32>) -> tensor<32x!tt.ptr<f32>>
+
+
+  * Pattern mlir::triton::{anonymous}::CombineAddPtrPattern : 'tt.addptr -> (arith.addi, tt.addptr)' {
+Trying to match "mlir::triton::{anonymous}::CombineAddPtrPattern"
+    ** Match Failure : castedOp1 is not ::mlir::triton::AddPtrOp type
+"mlir::triton::{anonymous}::CombineAddPtrPattern" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x2086d660) {
+  %14 = "tt.splat"(%arg2) : (!tt.ptr<f32>) -> tensor<32x!tt.ptr<f32>>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.mulf'(0x2086f810) {
+  %13 = "arith.mulf"(%12, %0) <{fastmath = #arith.fastmath<none>}> : (tensor<32xf32>, tensor<32xf32>) -> tensor<32xf32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.load'(0x20750170) {
+  %12 = "tt.load"(%11, %9, %1) <{boundaryCheck = array<i32>, cache = 1 : i32, evict = 1 : i32, isVolatile = false, operandSegmentSizes = array<i32: 1, 1, 1>}> : (tensor<32x!tt.ptr<f32>>, tensor<32xi1>, tensor<32xf32>) -> tensor<32xf32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.addptr'(0x2086c830) {
+  %11 = "tt.addptr"(%10, %7) : (tensor<32x!tt.ptr<f32>>, tensor<32xi32>) -> tensor<32x!tt.ptr<f32>>
+
+
+  * Pattern mlir::triton::{anonymous}::CombineAddPtrPattern : 'tt.addptr -> (arith.addi, tt.addptr)' {
+Trying to match "mlir::triton::{anonymous}::CombineAddPtrPattern"
+    ** Match Failure : castedOp1 is not ::mlir::triton::AddPtrOp type
+"mlir::triton::{anonymous}::CombineAddPtrPattern" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x2086c7a0) {
+  %10 = "tt.splat"(%arg0) : (!tt.ptr<f32>) -> tensor<32x!tt.ptr<f32>>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.cmpi'(0x2086b2d0) {
+  %9 = "arith.cmpi"(%7, %8) <{predicate = 2 : i64}> : (tensor<32xi32>, tensor<32xi32>) -> tensor<32xi1>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x208698d0) {
+  %8 = "tt.splat"(%arg3) : (i32) -> tensor<32xi32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.addi'(0x2086a920) {
+  %7 = "arith.addi"(%6, %5) <{overflowFlags = #arith.overflow<none>}> : (tensor<32xi32>, tensor<32xi32>) -> tensor<32xi32>
+
+
+  * Pattern mlir::triton::{anonymous}::CombineDotAddIPattern : 'arith.addi -> (tt.dot)' {
+Trying to match "mlir::triton::{anonymous}::CombineDotAddIPattern"
+    ** Match Failure : castedOp1 is not ::mlir::triton::DotOp type
+"mlir::triton::{anonymous}::CombineDotAddIPattern" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern mlir::triton::{anonymous}::CombineDotAddIRevPattern : 'arith.addi -> (tt.dot)' {
+Trying to match "mlir::triton::{anonymous}::CombineDotAddIRevPattern"
+    ** Match Failure : castedOp1 is not ::mlir::triton::DotOp type
+"mlir::triton::{anonymous}::CombineDotAddIRevPattern" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x208690e0) {
+  %6 = "tt.splat"(%4) : (i32) -> tensor<32xi32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.make_range'(0x20869070) {
+  %5 = "tt.make_range"() <{end = 32 : i32, start = 0 : i32}> : () -> tensor<32xi32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.muli'(0x2072fe90) {
+  %4 = "arith.muli"(%3, %2) <{overflowFlags = #arith.overflow<none>}> : (i32, i32) -> i32
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.get_program_id'(0x20802980) {
+  %3 = "tt.get_program_id"() <{axis = 0 : i32}> : () -> i32
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x208668d0) {
+  %2 = "arith.constant"() <{value = 32 : i32}> : () -> i32
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x2086d6f0) {
+  %1 = "arith.constant"() <{value = dense<0.000000e+00> : tensor<32xf32>}> : () -> tensor<32xf32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.func'(0x20832760) {
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x2086eee0) {
+  %0 = "arith.constant"() <{value = dense<2.000000e+00> : tensor<32xf32>}> : () -> tensor<32xf32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::AtLeastNOperands<3>::Impl<mlir::TypeID::get<mlir::OpTrait::AtLeastNOperands<3>::Impl>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::AtLeastNOperands<4>::Impl<mlir::TypeID::get<mlir::OpTrait::AtLeastNOperands<4>::Impl>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::AtLeastNOperands<5>::Impl<mlir::TypeID::get<mlir::OpTrait::AtLeastNOperands<5>::Impl>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::LLVM::FastmathFlagsInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::OneTypedResult<mlir::VectorType>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::NOperands<3>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::AtLeastNOperands<2>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::NOperands<5>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::NOperands<4>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::SameOperandsElementType<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::OneTypedResult<mlir::LLVM::LLVMPointerType>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::PromotableOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::LLVM::AccessGroupOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::LLVM::AliasAnalysisOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::PromotableMemOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::DestructurableAccessorOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::SafeMemorySlotAccessOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::OneTypedResult<mlir::IntegerType>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::LLVM::FPExceptionBehaviorOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::LLVM::RoundingModeOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::AtLeastNOperands<1>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::LLVM::NonNegFlagInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::LLVM::ExactFlagInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::LLVM::IntegerOverflowFlagsInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::AtLeastNSuccessors<1>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::BranchOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::WeightedBranchOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::SelectLikeOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::RegionBranchTerminatorOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::LLVM::DisjointFlagInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::LLVM::DereferenceableOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::CallableOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::FunctionOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::VariadicResults<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::NSuccessors<2>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::CallOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::VariadicSuccessors<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::SingleBlockImplicitTerminator<mlir::LLVM::ReturnOp>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::SymbolUserOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::ViewLikeOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::OneSuccessor<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::PromotableAllocationOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::DestructurableAllocationOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::HasParent<mlir::triton::gpu::WarpSpecializeOp>::Impl<mlir::TypeID::get<mlir::OpTrait::HasParent<mlir::triton::gpu::WarpSpecializeOp>::Impl>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::VariadicRegions<mlir::TypeID::get<mlir::OpTrait::VariadicRegions>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::RecursivelySpeculatableImplTrait<mlir::TypeID::get<mlir::OpTrait::RecursivelySpeculatableImplTrait>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::NRegions<2>::Impl<mlir::TypeID::get<mlir::OpTrait::NRegions<2>::Impl>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::AsyncRegions<mlir::TypeID::get<mlir::OpTrait::AsyncRegions>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::RegionBranchOpInterface::Trait<mlir::TypeID::get<mlir::RegionBranchOpInterface::Trait>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::HasParent<mlir::triton::gpu::WarpSpecializePartitionsOp>::Impl<mlir::TypeID::get<mlir::OpTrait::HasParent<mlir::triton::gpu::WarpSpecializePartitionsOp>::Impl>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::NOperands<3>::Impl<mlir::TypeID::get<mlir::OpTrait::NOperands<3>::Impl>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::OneTypedResult<mlir::triton::gpu::MemDescType>::Impl<mlir::TypeID::get<mlir::OpTrait::OneTypedResult<mlir::triton::gpu::MemDescType>::Impl>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::MemDescViewTrait<mlir::TypeID::get<mlir::OpTrait::MemDescViewTrait>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::triton::TransposeOpInterface::Trait<mlir::TypeID::get<mlir::triton::TransposeOpInterface::Trait>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::InferTypeOpAdaptor<mlir::TypeID::get<mlir::OpTrait::InferTypeOpAdaptor>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::HasParent<mlir::triton::gpu::MaskOp>::Impl<mlir::TypeID::get<mlir::OpTrait::HasParent<mlir::triton::gpu::MaskOp>::Impl>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::LocalLoadTrait<mlir::TypeID::get<mlir::OpTrait::LocalLoadTrait>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::OneTypedResult<mlir::triton::PointerType>::Impl<mlir::TypeID::get<mlir::OpTrait::OneTypedResult<mlir::triton::PointerType>::Impl>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::OneTypedResult<mlir::triton::gpu::AsyncTokenType>::Impl<mlir::TypeID::get<mlir::OpTrait::OneTypedResult<mlir::triton::gpu::AsyncTokenType>::Impl>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::SingleBlockImplicitTerminator<mlir::gpu::YieldOp>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::RegionBranchOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::gpu::AsyncOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::OneTypedResult<mlir::IndexType>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::HasParent<mlir::gpu::LaunchOp>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::AtLeastNResults<3>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::AtLeastNOperands<4>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::AtLeastNResults<1>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::AtLeastNOperands<3>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::AttrSizedResultSegments<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::AtLeastNOperands<6>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::NResults<2>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::HasParent<mlir::gpu::GPUFuncOp>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::DataLayoutOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::HasDefaultDLTIDataLayout<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::HasParent<mlir::gpu::GPUModuleOp>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::OneTypedResult<mlir::MemRefType>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::AtLeastNOperands<5>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::AtLeastNOperands<8>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::NResults<2>::Impl<mlir::TypeID::get<mlir::OpTrait::NResults<2>::Impl>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::HasParent<mlir::triton::ScanOp>::Impl<mlir::TypeID::get<mlir::OpTrait::HasParent<mlir::triton::ScanOp>::Impl>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::HasParent<mlir::triton::ReduceOp>::Impl<mlir::TypeID::get<mlir::OpTrait::HasParent<mlir::triton::ReduceOp>::Impl>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::SameOperandsShape<mlir::TypeID::get<mlir::OpTrait::SameOperandsShape>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::SameOperandsEncoding<mlir::TypeID::get<mlir::OpTrait::SameOperandsEncoding>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::HasParent<mlir::triton::MapElementwiseOp>::Impl<mlir::TypeID::get<mlir::OpTrait::HasParent<mlir::triton::MapElementwiseOp>::Impl>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::OneTypedResult<mlir::triton::TensorDescType>::Impl<mlir::TypeID::get<mlir::OpTrait::OneTypedResult<mlir::triton::TensorDescType>::Impl>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::triton::DotOpInterface::Trait<mlir::TypeID::get<mlir::triton::DotOpInterface::Trait>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::triton::DescriptorOpInterface::Trait<mlir::TypeID::get<mlir::triton::DescriptorOpInterface::Trait>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::triton::DescriptorStoreLikeOpInterface::Trait<mlir::TypeID::get<mlir::triton::DescriptorStoreLikeOpInterface::Trait>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::NOperands<4>::Impl<mlir::TypeID::get<mlir::OpTrait::NOperands<4>::Impl>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::CallOpInterface::Trait<mlir::TypeID::get<mlir::CallOpInterface::Trait>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::SymbolUserOpInterface::Trait<mlir::TypeID::get<mlir::SymbolUserOpInterface::Trait>()::Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::HasParent<mlir::scf::ExecuteRegionOp, mlir::scf::ForOp, mlir::scf::IfOp, mlir::scf::IndexSwitchOp, mlir::scf::WhileOp>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::NRegions<2>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::LoopLikeOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::HasParent<mlir::scf::ReduceOp>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::HasParent<mlir::scf::ParallelOp>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::SingleBlockImplicitTerminator<mlir::scf::ReduceOp>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::HasParallelRegion<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::AtLeastNRegions<1>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::SingleBlockImplicitTerminator<mlir::scf::YieldOp>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::HasParent<mlir::scf::ForallOp>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::ParallelCombiningOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::SingleBlockImplicitTerminator<mlir::scf::InParallelOp>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::DestinationStyleOpInterface::Trait<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::OpTrait::HasParent<mlir::scf::WhileOp>::Impl<Empty>)
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::arith::ArithRoundingModeInterface::Trait<Empty>)
+
+//===-------------------------------------------===//
+Processing operation : 'tt.return'(0x207f5260) {
+  "tt.return"() : () -> ()
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.store'(0x2078af70) {
+  "tt.store"(%15, %13, %9) <{boundaryCheck = array<i32>, cache = 1 : i32, evict = 1 : i32}> : (tensor<32x!tt.ptr<f32>>, tensor<32xf32>, tensor<32xi1>) -> ()
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.addptr'(0x2086f930) {
+  %15 = "tt.addptr"(%14, %7) : (tensor<32x!tt.ptr<f32>>, tensor<32xi32>) -> tensor<32x!tt.ptr<f32>>
+
+
+  * Pattern mlir::triton::{anonymous}::MoveBroadcastAfterElementwisePattern : 'tt.addptr -> ()' {
+Trying to match "mlir::triton::{anonymous}::MoveBroadcastAfterElementwisePattern"
+"mlir::triton::{anonymous}::MoveBroadcastAfterElementwisePattern" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern mlir::triton::{anonymous}::MoveSplatAfterElementwisePattern : 'tt.addptr -> ()' {
+Trying to match "mlir::triton::{anonymous}::MoveSplatAfterElementwisePattern"
+"mlir::triton::{anonymous}::MoveSplatAfterElementwisePattern" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x2086d660) {
+  %14 = "tt.splat"(%arg2) : (!tt.ptr<f32>) -> tensor<32x!tt.ptr<f32>>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.mulf'(0x2086f810) {
+  %13 = "arith.mulf"(%12, %0) <{fastmath = #arith.fastmath<none>}> : (tensor<32xf32>, tensor<32xf32>) -> tensor<32xf32>
+
+
+  * Pattern mlir::triton::{anonymous}::MoveBroadcastAfterElementwisePattern : 'arith.mulf -> ()' {
+Trying to match "mlir::triton::{anonymous}::MoveBroadcastAfterElementwisePattern"
+"mlir::triton::{anonymous}::MoveBroadcastAfterElementwisePattern" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern mlir::triton::{anonymous}::MoveSplatAfterElementwisePattern : 'arith.mulf -> ()' {
+Trying to match "mlir::triton::{anonymous}::MoveSplatAfterElementwisePattern"
+"mlir::triton::{anonymous}::MoveSplatAfterElementwisePattern" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.load'(0x20750170) {
+  %12 = "tt.load"(%11, %9, %1) <{boundaryCheck = array<i32>, cache = 1 : i32, evict = 1 : i32, isVolatile = false, operandSegmentSizes = array<i32: 1, 1, 1>}> : (tensor<32x!tt.ptr<f32>>, tensor<32xi1>, tensor<32xf32>) -> tensor<32xf32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.addptr'(0x2086c830) {
+  %11 = "tt.addptr"(%10, %7) : (tensor<32x!tt.ptr<f32>>, tensor<32xi32>) -> tensor<32x!tt.ptr<f32>>
+
+
+  * Pattern mlir::triton::{anonymous}::MoveBroadcastAfterElementwisePattern : 'tt.addptr -> ()' {
+Trying to match "mlir::triton::{anonymous}::MoveBroadcastAfterElementwisePattern"
+"mlir::triton::{anonymous}::MoveBroadcastAfterElementwisePattern" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern mlir::triton::{anonymous}::MoveSplatAfterElementwisePattern : 'tt.addptr -> ()' {
+Trying to match "mlir::triton::{anonymous}::MoveSplatAfterElementwisePattern"
+"mlir::triton::{anonymous}::MoveSplatAfterElementwisePattern" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x2086c7a0) {
+  %10 = "tt.splat"(%arg0) : (!tt.ptr<f32>) -> tensor<32x!tt.ptr<f32>>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.cmpi'(0x2086b2d0) {
+  %9 = "arith.cmpi"(%7, %8) <{predicate = 2 : i64}> : (tensor<32xi32>, tensor<32xi32>) -> tensor<32xi1>
+
+
+  * Pattern mlir::triton::{anonymous}::MoveBroadcastAfterElementwisePattern : 'arith.cmpi -> ()' {
+Trying to match "mlir::triton::{anonymous}::MoveBroadcastAfterElementwisePattern"
+"mlir::triton::{anonymous}::MoveBroadcastAfterElementwisePattern" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern mlir::triton::{anonymous}::MoveSplatAfterElementwisePattern : 'arith.cmpi -> ()' {
+Trying to match "mlir::triton::{anonymous}::MoveSplatAfterElementwisePattern"
+"mlir::triton::{anonymous}::MoveSplatAfterElementwisePattern" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x208698d0) {
+  %8 = "tt.splat"(%arg3) : (i32) -> tensor<32xi32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.addi'(0x2086a920) {
+  %7 = "arith.addi"(%6, %5) <{overflowFlags = #arith.overflow<none>}> : (tensor<32xi32>, tensor<32xi32>) -> tensor<32xi32>
+
+
+  * Pattern mlir::triton::{anonymous}::MoveBroadcastAfterElementwisePattern : 'arith.addi -> ()' {
+Trying to match "mlir::triton::{anonymous}::MoveBroadcastAfterElementwisePattern"
+"mlir::triton::{anonymous}::MoveBroadcastAfterElementwisePattern" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern mlir::triton::{anonymous}::MoveSplatAfterElementwisePattern : 'arith.addi -> ()' {
+Trying to match "mlir::triton::{anonymous}::MoveSplatAfterElementwisePattern"
+"mlir::triton::{anonymous}::MoveSplatAfterElementwisePattern" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.splat'(0x208690e0) {
+  %6 = "tt.splat"(%4) : (i32) -> tensor<32xi32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.make_range'(0x20869070) {
+  %5 = "tt.make_range"() <{end = 32 : i32, start = 0 : i32}> : () -> tensor<32xi32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.muli'(0x2072fe90) {
+  %4 = "arith.muli"(%3, %2) <{overflowFlags = #arith.overflow<none>}> : (i32, i32) -> i32
+
+
+  * Pattern mlir::triton::{anonymous}::MoveBroadcastAfterElementwisePattern : 'arith.muli -> ()' {
+Trying to match "mlir::triton::{anonymous}::MoveBroadcastAfterElementwisePattern"
+"mlir::triton::{anonymous}::MoveBroadcastAfterElementwisePattern" result 0
+  } -> failure : pattern failed to match
+
+  * Pattern mlir::triton::{anonymous}::MoveSplatAfterElementwisePattern : 'arith.muli -> ()' {
+Trying to match "mlir::triton::{anonymous}::MoveSplatAfterElementwisePattern"
+"mlir::triton::{anonymous}::MoveSplatAfterElementwisePattern" result 0
+  } -> failure : pattern failed to match
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.get_program_id'(0x20802980) {
+  %3 = "tt.get_program_id"() <{axis = 0 : i32}> : () -> i32
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x208668d0) {
+  %2 = "arith.constant"() <{value = 32 : i32}> : () -> i32
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x2086d6f0) {
+  %1 = "arith.constant"() <{value = dense<0.000000e+00> : tensor<32xf32>}> : () -> tensor<32xf32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'tt.func'(0x20832760) {
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+
+//===-------------------------------------------===//
+Processing operation : 'arith.constant'(0x2086eee0) {
+  %0 = "arith.constant"() <{value = dense<2.000000e+00> : tensor<32xf32>}> : () -> tensor<32xf32>
+
+} -> failure : all patterns failed to match
+//===-------------------------------------------===//
+ImplicitTypeIDRegistry::lookupOrInsert(mlir::DominanceInfo)
+[triton-loop-unroll]: Loop unroll pass
+tensor([[11, 28, 28,  ...,  3, 30, 21],
+        [ 4, 11, 28,  ..., 23, 11, 14],
+        [ 9,  9,  1,  ..., 24, 11,  2],
+        ...,
+        [ 0, 18,  4,  ..., 20,  9, 13],
+        [19, 18, 20,  ...,  1, 20, 17],
+        [26, 24,  4,  ...,  3, 15, 10]], dtype=torch.int32)
+tensor([1.5656, 0.6451, 1.0838,  ..., 0.0000, 0.0000, 0.0000])

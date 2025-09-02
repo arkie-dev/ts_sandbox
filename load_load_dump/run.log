@@ -1,0 +1,5 @@
+PtrAnalysis: encountered addptr operand produced by an unsupported operation
+%17 = "tts.load"(%9, %16) <{operandSegmentSizes = array<i32: 1, 1, 0>, static_mask_dims = array<i64: -9223372036854775808>}> : (tensor<1024x!tt.ptr<i32>>, index) -> tensor<1024xi32> loc("idx"("/home/devro/workspace/ts_sandbox/load_load.py":16:18))
+PtrAnalysis: encountered addptr operand produced by an unsupported operation
+%17 = "tts.load"(%9, %16) <{operandSegmentSizes = array<i32: 1, 1, 0>, static_mask_dims = array<i64: -9223372036854775808>}> : (tensor<1024x!tt.ptr<i32>>, index) -> tensor<1024xi32> loc("idx"("/home/devro/workspace/ts_sandbox/load_load.py":16:18))
+tensor([0.7714, 0.5598, 0.3784,  ..., 1.6840, 0.5070, 0.1807])

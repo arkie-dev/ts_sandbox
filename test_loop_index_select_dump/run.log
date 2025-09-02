@@ -1,0 +1,6 @@
+PtrAnalysis: encountered addptr operand produced by an unsupported operation
+%30 = "tts.load"(%20, %29, %c0_i32_4) <{operandSegmentSizes = array<i32: 1, 1, 1>, static_mask_dims = array<i64: -9223372036854775808>}> : (tensor<1024x!tt.ptr<i32>>, index, i32) -> tensor<1024xi32> loc("indices"("/home/devro/workspace/ts_sandbox/test_loop_index_select.py":36:47))
+PtrAnalysis: encountered addptr operand produced by an unsupported operation
+%30 = "tts.load"(%20, %29, %c0_i32_4) <{operandSegmentSizes = array<i32: 1, 1, 1>, static_mask_dims = array<i64: -9223372036854775808>}> : (tensor<1024x!tt.ptr<i32>>, index, i32) -> tensor<1024xi32> loc("indices"("/home/devro/workspace/ts_sandbox/test_loop_index_select.py":36:47))
+PtrAnalysis: encountered addptr operand produced by an unsupported operation
+%30 = "tts.load"(%20, %29, %c0_i32_4) <{operandSegmentSizes = array<i32: 1, 1, 1>, static_mask_dims = array<i64: -9223372036854775808>}> : (tensor<1024x!tt.ptr<i32>>, index, i32) -> tensor<1024xi32> loc("indices"("/home/devro/workspace/ts_sandbox/test_loop_index_select.py":36:47))
