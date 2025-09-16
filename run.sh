@@ -11,13 +11,13 @@ DUMP_DIR="${TEST_NAME}_dump"
 rm -fr $DUMP_DIR
 mkdir $DUMP_DIR
 
-export TRITON_ENABLE_LLVM_DEBUG=1 
-export TRITON_KERNEL_DUMP=1
-export TRITON_DUMP_DIR="$DUMP_DIR/triton"
-export TRITON_ALWAYS_COMPILE=1
+# export TRITON_ENABLE_LLVM_DEBUG=1 
+# export TRITON_KERNEL_DUMP=1
+# export TRITON_DUMP_DIR="$DUMP_DIR/triton"
+# export TRITON_ALWAYS_COMPILE=1
 
-export MLIR_ENABLE_DUMP=1 
-export MLIR_DUMP_PATH="$DUMP_DIR/mlir_dump" 
+# export MLIR_ENABLE_DUMP=1 
+# export MLIR_DUMP_PATH="$DUMP_DIR/mlir_dump" 
 
 LOG="$DUMP_DIR/run.log" 
 touch $LOG
