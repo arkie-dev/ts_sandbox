@@ -1,0 +1,795 @@
+diff --git a/ascend/triton-adapter/include/TritonToUnstructure/UnstructureConversionPass.h b/ascend/triton-adapter/include/TritonToUnstructure/UnstructureConversionPass.h
+index c806521..2e88e83 100644
+--- a/ascend/triton-adapter/include/TritonToUnstructure/UnstructureConversionPass.h
++++ b/ascend/triton-adapter/include/TritonToUnstructure/UnstructureConversionPass.h
+@@ -4,6 +4,7 @@
+ #include "TritonToUnstructure/OffsetAnalysis.h"
+ #include "mlir/Pass/Pass.h"
+ #include "triton/Dialect/Triton/IR/Dialect.h"
++#include "mlir/Dialect/MemRef/IR/MemRef.h"
+ 
+ #include "mlir/IR/PatternMatch.h"
+ 
+@@ -78,6 +79,14 @@ private:
+                             ArrayRef<Value> iterIdx,
+                             PatternRewriter &rewriter) const;
+ 
++
++  LogicalResult rewriteAddPtr(triton::AddPtrOp& addPtr, PtrOffsetInfo& ptrOffsetInfo, PatternRewriter &rewriter) const;
++
++  LogicalResult rewriteStructureDim(MemAccOpTy op, int dim, PtrOffsetInfo& ptrOffsetInfo, 
++    memref::AllocOp &allocOp, PatternRewriter &rewriter) const;  
++  LogicalResult rewriteUnstructureDim(MemAccOpTy op, int dim, PtrOffsetInfo& ptrOffsetInfo, 
++    memref::AllocOp &allocOp, PatternRewriter &rewriter) const;
++
+   const llvm::DenseMap<Value, PtrOffsetInfo> &offsetMap;
+ };
+ 
+diff --git a/ascend/triton-adapter/lib/TritonToLinalg/BlockPtrAnalysis.cpp b/ascend/triton-adapter/lib/TritonToLinalg/BlockPtrAnalysis.cpp
+index 12b3ee3..a78f915 100644
+--- a/ascend/triton-adapter/lib/TritonToLinalg/BlockPtrAnalysis.cpp
++++ b/ascend/triton-adapter/lib/TritonToLinalg/BlockPtrAnalysis.cpp
+@@ -273,6 +273,7 @@ memref::ReinterpretCastOp BlockData::createCastOp(ArrayRef<int64_t> resultShape,
+ }
+ 
+ void BlockData::dump() const {
++  
+   llvm::outs() << "[INFO][BEG] BlockData info\n";
+   llvm::outs() << "offsets has " << offsets.size() << " items\n";
+   int cnt = 0;
+@@ -690,7 +691,7 @@ BlockDataParser::parseTensorPtr(
+ 
+ void BlockDataParser::parseAddPtr(
+     triton::AddPtrOp op, BlockData &data, const Location &loc,
+-    ConversionPatternRewriter &rewriter,
++    git  &rewriter,
+     const llvm::SmallDenseMap<Value, BlockData> &known) {
+   assert(data.isEmpty());
+ 
+@@ -1430,6 +1431,11 @@ bool isUsedforMask(Value v, int depth = 0) {
+ //   %8 = tt.addptr %5, %newRes : tensor<128x!tt.ptr<i32>>, tensor<128xi32>
+ // }
+ Value createFromData(RankedTensorType resType, const BlockData &data, const Location &loc, OpBuilder &builder, bool isMaskIterArg) {
++
++      LLVM_DEBUG({
++        llvm::dbgs() << "KMLOG createFromData\n";
++      });
++
+   auto resShape = resType.getShape();
+   Value newRes = nullptr;
+   for (size_t i = 0; i < resShape.size(); i++) {
+diff --git a/ascend/triton-adapter/lib/TritonToLinalg/LoadStoreConverter.cpp b/ascend/triton-adapter/lib/TritonToLinalg/LoadStoreConverter.cpp
+index a7abac8..33ce2f2 100644
+--- a/ascend/triton-adapter/lib/TritonToLinalg/LoadStoreConverter.cpp
++++ b/ascend/triton-adapter/lib/TritonToLinalg/LoadStoreConverter.cpp
+@@ -192,8 +192,11 @@ LogicalResult
+ LoadConverter::matchAndRewrite(triton::LoadOp op, OpAdaptor adaptor,
+                                ConversionPatternRewriter &rewriter) const {
+ 
++  LLVM_DEBUG({ llvm::dbgs() << "KMLOG LoadConverter::matchAndRewrite start\n"; });
++
+   // Check if tt.load is modified by AddPtrConverter to a specified state.
+   if (checkModifiedByAddPtrConverter(op).succeeded()) {
++    LLVM_DEBUG({ llvm::dbgs() << "KMLOG continueModifyFromAddPtrConverter\n"; });
+     return continueModifyFromAddPtrConverter(op, adaptor, rewriter);
+   }
+ 
+@@ -288,6 +291,7 @@ LoadConverter::matchAndRewrite(triton::LoadOp op, OpAdaptor adaptor,
+       auto markOp = rewriter.create<annotation::MarkOp>(loc, dstSubview);
+       markOp->setAttr(MayImplicitTransposeWithLastAxisTAG, UnitAttr::get(rewriter.getContext()));
+     }
++    LLVM_DEBUG({ llvm::dbgs() << "KMLOG continueModifyFromAddPtrConverter\n"; });
+     return this->toTensorAndReplace(op, tensorType, allocOp, mayImplicitTransposeWithLastAxis, loc, rewriter);
+   }
+ 
+@@ -313,7 +317,7 @@ LoadConverter::matchAndRewrite(triton::LoadOp op, OpAdaptor adaptor,
+         markOp->setAttr(MayImplicitTransposeWithLastAxisTAG, UnitAttr::get(rewriter.getContext()));
+       }
+     }
+-
++    LLVM_DEBUG({ llvm::dbgs() << "KMLOG LoadConverter::matchAndRewrite end1\n"; });
+     return this->toTensorAndReplace(op, tensorType, allocOp, mayImplicitTransposeWithLastAxis, loc, rewriter);
+   }
+ 
+@@ -349,6 +353,7 @@ LoadConverter::matchAndRewrite(triton::LoadOp op, OpAdaptor adaptor,
+         DeinterleaveStatusWithMaskOptimization(op, adaptor, rewriter, mstate,
+                                                allocOp)
+             .succeeded()) {
++      LLVM_DEBUG({ llvm::dbgs() << "KMLOG LoadConverter::matchAndRewrite end2\n"; });
+       return success();
+     }
+   }
+@@ -367,6 +372,7 @@ LoadConverter::matchAndRewrite(triton::LoadOp op, OpAdaptor adaptor,
+       markOp->setAttr(MayImplicitTransposeWithLastAxisTAG, UnitAttr::get(rewriter.getContext()));
+     }
+   }
++  LLVM_DEBUG({ llvm::dbgs() << "KMLOG LoadConverter::matchAndRewrite end3\n"; });
+   return this->toTensorAndReplace(op, tensorType, allocOp, mayImplicitTransposeWithLastAxis, loc, rewriter);
+ }
+ 
+diff --git a/ascend/triton-adapter/lib/TritonToUnstructure/OffsetAnalysis.cpp b/ascend/triton-adapter/lib/TritonToUnstructure/OffsetAnalysis.cpp
+index 4f2afb8..ea45aac 100644
+--- a/ascend/triton-adapter/lib/TritonToUnstructure/OffsetAnalysis.cpp
++++ b/ascend/triton-adapter/lib/TritonToUnstructure/OffsetAnalysis.cpp
+@@ -10,6 +10,9 @@
+ namespace mlir {
+ namespace triton {
+ 
++constexpr const char* ident = "    ";
++constexpr const char* ident2 = "        ";
++
+ PtrOffsetInfo::PtrOffsetInfo() : ptr(nullptr), offset(nullptr) {}
+ 
+ PtrOffsetInfo::PtrOffsetInfo(const PtrOffsetInfo &other) {
+@@ -153,17 +156,20 @@ PtrOffsetInfo combineInfo(const PtrOffsetInfo &lhs, const PtrOffsetInfo &rhs) {
+ 
+ void parse(Value operand, const Location &loc, RewriterBase &rewriter,
+            llvm::DenseMap<Value, PtrOffsetInfo> &offsetMap) {
++
++  // LLVM_DEBUG({ llvm::dbgs() << "KMLOG PtrOffsetInfo::parse\n"; });
++
+   if (offsetMap.contains(operand)) {
+     LLVM_DEBUG({
+       auto &os = llvm::dbgs();
+-      os << "found\n" << operand << '\n';
++      os << "found: " << operand << '\n';
+     });
+     return;
+   }
+ 
+   LLVM_DEBUG({
+     auto &os = llvm::dbgs();
+-    os << "parse\n" << operand << '\n';
++    os << "parse: " << operand << '\n';
+   });
+ 
+   if (auto *defOp = operand.getDefiningOp()) {
+@@ -207,10 +213,10 @@ void parse(Value operand, const Location &loc, RewriterBase &rewriter,
+ 
+   LLVM_DEBUG({
+     auto &os = llvm::dbgs();
+-    os << "finish parse\n" << operand << '\n';
++    os << "finish parse: " << operand << " structured: ";
+     auto data = offsetMap.at(operand);
+     for (auto s : data.getStructuredRef())
+-      os << s;
++      os << s << " ";
+     os << "\n";
+   });
+ }
+@@ -356,16 +362,18 @@ void parseAddPtr(triton::AddPtrOp op, const Location &loc,
+           op.getLoc(), rewriter.getIntegerType(64), offsetValue);
+     }
+   }
++
+   LLVM_DEBUG({
+     auto &os = llvm::dbgs();
+-    os << "[parseAddPtr] Adding offset\n";
+-    os << ptrOffsetInfo.getOffset() << '\n' << offsetValue << '\n';
++    os << ident << "[parseAddPtr] Adding offset\n";
++    os << ident << ptrOffsetInfo.getOffset() << "\n    " << offsetValue << '\n';
+   });
++
+   Value offset = rewriter.create<arith::AddIOp>(
+       op.getLoc(), ptrOffsetInfo.getOffset(), offsetValue);
+   LLVM_DEBUG({
+     auto &os = llvm::dbgs();
+-    os << "[parseAddPtr] offset is\n" << offset << '\n';
++    os << ident << "[parseAddPtr] offset is\n" << offset << '\n';
+   });
+   // Set addPtr offset map
+   auto dst = op.getResult();
+@@ -377,13 +385,15 @@ void parseAddPtr(triton::AddPtrOp op, const Location &loc,
+     auto &os = llvm::dbgs();
+     SmallVector<bool> &ptrStructured = ptrOffsetInfo.getStructuredRef();
+     SmallVector<bool> &offsetStructured = offsetOffsetInfo.getStructuredRef();
++     
+     os << "[parseAddPtr] ptrStructured: ";
+     for (size_t i = 0; i < ptrStructured.size(); i++)
+-      os << ptrStructured[i];
++      os << ident << ptrStructured[i];
+     os << "\n";
+-    os << "[parseAddPtr] offsetStructured: ";
++
++    os << ident << "[parseAddPtr] offsetStructured: ";
+     for (size_t i = 0; i < offsetStructured.size(); i++)
+-      os << offsetStructured[i];
++      os << ident << offsetStructured[i];
+     os << "\n";
+   });
+ }
+@@ -565,6 +575,20 @@ void parseMulI(arith::MulIOp op, const Location &loc, RewriterBase &rewriter,
+       dstStructured[i] = false;
+ }
+ 
++SmallVector<int64_t> filterDims(::llvm::ArrayRef<int64_t> shapes, SmallVector<bool> isDimStructured) {
++  SmallVector<int64_t> resultShape;
++  //Filttering dims
++  for (const auto &[dimFromShape, dimStructuredInfo] : llvm::zip_equal(shapes, isDimStructured)){
++      if (dimStructuredInfo) { 
++        break;
++      }
++      resultShape.push_back(dimFromShape);
++  }
++  return resultShape;
++}
++
++
++
+ void parseBroadcast(triton::BroadcastOp op, const Location &loc,
+                     RewriterBase &rewriter,
+                     llvm::DenseMap<Value, PtrOffsetInfo> &offsetMap) {
+@@ -577,19 +601,33 @@ void parseBroadcast(triton::BroadcastOp op, const Location &loc,
+   auto dst = op.getResult();
+   assert(isa<ShapedType>(src.getType()) &&
+          "tt.broadcast's input should be a tensor");
++
+   auto srcType = cast<RankedTensorType>(src.getType());
+   auto dstType = cast<RankedTensorType>(dst.getType());
+   assert(srcType.getRank() == dstType.getRank() &&
+          "rank of source shoule be equal to destnation");
++
++
++
+   auto broadcastDim = ConverterUtils::getBroadcastDims(srcType, dstType);
+   // Set broadcast offset map
+   offsetMap[dst] = PtrOffsetInfo(srcOffsetInfo.getPtr());
+   offsetMap[dst].setScalarLike(srcOffsetInfo.isScalarLike());
++  SmallVector<bool> &dstStructured = offsetMap[dst].getStructuredRef();
++  dstStructured.resize(srcStructured.size());
++  for (size_t i = 0; i < dstStructured.size(); i++)
++    if (llvm::find(broadcastDim, i) != broadcastDim.end())
++      dstStructured[i] = true;
++    else
++      dstStructured[i] = srcStructured[i];
+ 
+   if (srcOffsetInfo.getPtr()) {
++
+     RewriterBase::InsertionGuard guard(rewriter);
+     rewriter.setInsertionPoint(op);
++
+     Value valueOffset = srcOffsetInfo.getOffset();
++
+     Value offset = rewriter.create<triton::BroadcastOp>(
+         loc,
+         RankedTensorType::get(dstType.getShape(), rewriter.getIntegerType(64)),
+@@ -598,13 +636,21 @@ void parseBroadcast(triton::BroadcastOp op, const Location &loc,
+     offsetMap[dst].setOffset(offset);
+   }
+ 
+-  SmallVector<bool> &dstStructured = offsetMap[dst].getStructuredRef();
+-  dstStructured.resize(srcStructured.size());
+-  for (size_t i = 0; i < dstStructured.size(); i++)
+-    if (llvm::find(broadcastDim, i) != broadcastDim.end())
+-      dstStructured[i] = true;
+-    else
+-      dstStructured[i] = srcStructured[i];
++
++    // LLVM_DEBUG({
++    //   for (auto& dim : broadcastDim) {
++    //   llvm::dbgs() << "KMLOG " << dim << "\n"; 
++    //   }});
++
++
++  //   LLVM_DEBUG({
++  //   auto &os = llvm::dbgs();
++  //   os << "KMLOG parseBroadcast ptrOffsetInfo dstStructured dump\n";
++  //   for (auto s : dstStructured)
++  //     os << s;
++  //   os << "\n";
++  // });
++
+ }
+ 
+ void parseExpandDims(triton::ExpandDimsOp op, const Location &loc,
+diff --git a/ascend/triton-adapter/lib/TritonToUnstructure/UnstructureConversionPass.cpp b/ascend/triton-adapter/lib/TritonToUnstructure/UnstructureConversionPass.cpp
+index 01d26b5..68620ec 100644
+--- a/ascend/triton-adapter/lib/TritonToUnstructure/UnstructureConversionPass.cpp
++++ b/ascend/triton-adapter/lib/TritonToUnstructure/UnstructureConversionPass.cpp
+@@ -1,4 +1,5 @@
+ #include "TritonToUnstructure/UnstructureConversionPass.h"
++#include "TritonToLinalg/BlockPtrAnalysis.h"
+ #include "Utils/Utils.h"
+ #include "triton/Dialect/Triton/IR/Dialect.h"
+ 
+@@ -9,6 +10,8 @@
+ #include "mlir/Pass/PassManager.h"
+ #include "mlir/Transforms/GreedyPatternRewriteDriver.h"
+ #include "mlir/Transforms/Passes.h"
++#include "mlir/IR/Visitors.h"
++#include "llvm/ADT/TypeSwitch.h"
+ 
+ #include "llvm/ADT/STLExtras.h"
+ 
+@@ -137,9 +140,159 @@ UnstructuredMemAccessConverter<MemAccOpTy>::UnstructuredMemAccessConverter(
+     MLIRContext *context, const llvm::DenseMap<Value, PtrOffsetInfo> &offsetMap)
+     : OpRewritePattern<MemAccOpTy>(context), offsetMap(offsetMap) {}
+ 
++
++
++  struct TestRewrite {
++
++  LogicalResult rewriteOp(Operation *rootOp) {
++    LLVM_DEBUG({ llvm::dbgs() << "rewriting rootOp: " << rootOp; 
++      rootOp->dump();
++    });
++
++    rootOp->walk<WalkOrder::PreOrder>([&](Operation *op) {
++               LLVM_DEBUG({ llvm::dbgs() << "TESDSTTTTT " << op << "\n";}); 
++      if (op == rootOp) {
++        return WalkResult::advance();
++      }
++      return TypeSwitch<Operation *, WalkResult>(op)
++          .Case<triton::AddPtrOp>([&](auto addptr) {
++            if (rewriteAddptrOp(addptr).failed()) {
++              addptr->emitRemark("Failed to rewrite AddPtrOp");
++            }
++            return WalkResult::advance();
++          }).Case<triton::LoadOp>([&](auto op) {
++            if (rewriteLoadOp(op).failed()) {
++              op->emitRemark("Failed to rewrite AddPtrOp");
++            }
++            return WalkResult::advance();
++          })
++          .Default([&](auto op ) {
++            LLVM_DEBUG({ llvm::dbgs() << "Default " << op << "\n";}); 
++            return WalkResult::advance();
++          });
++      });
++    return success();
++  }
++  
++
++
++  LogicalResult rewriteAddptrOp(triton::AddPtrOp addptr){
++    LLVM_DEBUG({ llvm::dbgs() << "rewriteAddptrOp: " << addptr; });
++
++    return success();
++  }
++
++  LogicalResult rewriteLoadOp(triton::LoadOp loadOp){
++    LLVM_DEBUG({ llvm::dbgs() << "rewriteLoadOp: " << loadOp; });
++
++    auto ptrOp = loadOp.getPtr().getDefiningOp();
++      LLVM_DEBUG({ llvm::dbgs() << "rewriteLoadOp: " << ptrOp; });
++
++    return rewriteOp(ptrOp);
++    // return success();
++  }
++
++  };
++
++template <typename MemAccOpTy>
++LogicalResult UnstructuredMemAccessConverter<MemAccOpTy>::rewriteAddPtr(
++  triton::AddPtrOp& addPtr,  PtrOffsetInfo& ptrOffsetInfo, PatternRewriter &rewriter) const {
++  LLVM_DEBUG({llvm::dbgs() << "rewriteAddPtr: " << addPtr << "\n"; });
++  auto insertPoint = rewriter.saveInsertionPoint();
++
++  auto offset = addPtr.getOffset();
++  LLVM_DEBUG({llvm::dbgs() << "     addPtrOp offset: " << offset << "\n"; });
++
++  auto srcPtr = ptrOffsetInfo.getPtr();
++  auto offset2 = ptrOffsetInfo.getOffset();
++  LLVM_DEBUG({llvm::dbgs() << "     addPtrOp srcPtr: " << srcPtr << "\n"; });
++  LLVM_DEBUG({llvm::dbgs() << "     addPtrOp offset2: " << offset2 << "\n"; });
++
++
++  rewriter.restoreInsertionPoint(insertPoint);
++  return success();
++}
++
++template <typename MemAccOpTy>
++LogicalResult UnstructuredMemAccessConverter<MemAccOpTy>::rewriteStructureDim(
++  MemAccOpTy op, int dim, PtrOffsetInfo& ptrOffsetInfo, memref::AllocOp &allocOp, PatternRewriter &rewriter) const{
++  LLVM_DEBUG({llvm::dbgs() << "rewriteStructureDim: "  << dim  << " for op " << op << "\n"; });
++  auto loc = op.getLoc();
++  auto ptr = op.getPtr();
++  auto srcPtr = ptrOffsetInfo.getPtr();
++  auto offset = ptrOffsetInfo.getOffset();
++  LLVM_DEBUG({auto& os = llvm::dbgs(); 
++    os << "    ptr: " << ptr << "\n"; 
++    os << "    srcPtr: " << srcPtr << "\n"; 
++    os << "    offset: " << offset << "\n";
++    os << "    allocOp " << allocOp << "\n";
++  });
++
++  auto ptrType = dyn_cast<RankedTensorType>(ptr.getType());
++  auto ptrShape = ptrType.getShape();
++  LLVM_DEBUG({llvm::dbgs() << "rewriteStructureDim " << ptrType.getRank() << "\n";});
++
++
++  if (auto addPtr = dyn_cast<triton::AddPtrOp>(ptr.getDefiningOp())) {
++    auto resutl = rewriteAddPtr(addPtr, ptrOffsetInfo, rewriter);
++  }
++
++
++
++
++
++
++  
++
++  if (ptrType.getRank() == dim) {
++      LLVM_DEBUG({llvm::dbgs() << "rewriteStructureDim \n";});
++  }
++
++
++  return success();
++}
++
++template <typename MemAccOpTy>
++LogicalResult UnstructuredMemAccessConverter<MemAccOpTy>::rewriteUnstructureDim(
++  MemAccOpTy op, int dim, PtrOffsetInfo& ptrOffsetInfo, memref::AllocOp &allocOp, PatternRewriter &rewriter) const {
++  LLVM_DEBUG({llvm::dbgs() << "rewriteUnstructureDim " << dim  << " for op " << op << "\n";});
++  auto loc = op.getLoc();
++  auto ptr = op.getPtr();
++  auto srcPtr = ptrOffsetInfo.getPtr();
++  auto offset = ptrOffsetInfo.getOffset();
++  LLVM_DEBUG({auto& os = llvm::dbgs(); 
++    os << "    ptr: " << ptr << "\n"; 
++    os << "    srcPtr: " << srcPtr << "\n"; 
++    os << "    offset: " << offset << "\n";
++    os << "    allocOp " << allocOp << "\n";
++  });
++  Value zeroIdx = rewriter.create<arith::ConstantOp>(loc, rewriter.getIndexAttr(0));
++  Value oneIdx = rewriter.create<arith::ConstantOp>(loc, rewriter.getIndexAttr(1));
++
++
++  auto ptrType = dyn_cast<RankedTensorType>(ptr.getType());
++  auto ptrShape = ptrType.getShape();
++
++  Value sizeVal = rewriter.create<arith::ConstantOp>(loc, rewriter.getIndexAttr(ptrShape[dim]));
++
++  scf::ForOp forOp = rewriter.create<scf::ForOp>(loc, zeroIdx, sizeVal, oneIdx);
++  rewriter.setInsertionPointToStart(forOp.getBody());
++
++  auto extractedOffset = createExtractOp(loc, offset, forOp.getInductionVar(), rewriter);
++
++  if (ptrType.getRank() == dim) {
++  
++  }
++
++  return success();
++}
++
+ template <typename MemAccOpTy>
+ LogicalResult UnstructuredMemAccessConverter<MemAccOpTy>::matchAndRewrite(
+     MemAccOpTy op, PatternRewriter &rewriter) const {
++
++  LLVM_DEBUG({llvm::dbgs() << "matchAndRewrite for op " << op << "\n";});
++
+   auto loc = op.getLoc();
+ 
+   auto ptr = op.getPtr();
+@@ -158,13 +311,6 @@ LogicalResult UnstructuredMemAccessConverter<MemAccOpTy>::matchAndRewrite(
+        llvm::all_of(ptrType.getShape(), [](int64_t dim) { return dim == 1; })))
+     return failure();
+ 
+-  LLVM_DEBUG({
+-    auto &os = llvm::dbgs();
+-    os << "Converting " << op->getName() << "\n";
+-    os << op << "\n";
+-    os << ptrOffsetInfo.isStructured() << "\n";
+-  });
+-
+   if constexpr (std::is_same_v<MemAccOpTy, triton::LoadOp>)
+     if (ptrOffsetInfo.isScalarLike()) {
+       splatAndLoadScenario(op, ptrOffsetInfo.getRank(), rewriter);
+@@ -179,121 +325,165 @@ LogicalResult UnstructuredMemAccessConverter<MemAccOpTy>::matchAndRewrite(
+ 
+   // Check if offsetShape is equal to localMem shape
+ 
+-  Value zeroIdx =
+-      rewriter.create<arith::ConstantOp>(loc, rewriter.getIndexAttr(0));
+-  Value oneIdx =
+-      rewriter.create<arith::ConstantOp>(loc, rewriter.getIndexAttr(1));
+-  auto resultShape = ptrType.getShape();
+-  auto resultElementType =
+-      cast<triton::PointerType>(ptrType.getElementType()).getPointeeType();
+-
+-  Value iterArg = nullptr;
+-
+-  // Only load case
+-  if (isLoadLike) {
+-    iterArg =
+-        rewriter.create<tensor::EmptyOp>(loc, resultShape, resultElementType);
+-  }
+-  Value newOpResult = nullptr;
+-
+   auto insertPoint = rewriter.saveInsertionPoint();
+ 
+-  SmallVector<OpFoldResult> dims(resultShape.size(), rewriter.getIndexAttr(1));
+-  SmallVector<OpFoldResult> offsets;
+-  SmallVector<OpFoldResult> strides;
+-  SmallVector<Value> iterIdx;
++  SmallVector<int64_t> resultShape;
++  int64_t lastDimShape;
++  auto structuredInfo = ptrOffsetInfo.getStructuredRef();
++  auto ptrShape = ptrType.getShape();
+ 
+-  SmallVector<int64_t> localMemStrides(1, 1);
++  auto resultElementType = cast<triton::PointerType>(ptrType.getElementType()).getPointeeType();
++  auto alloc = rewriter.create<memref::AllocOp>(loc, MemRefType::get(ptrShape, resultElementType));
++  LLVM_DEBUG({llvm::dbgs() << "creating memory area for result: " << alloc << "\n";});
++ 
+ 
+-  for (auto size : llvm::reverse(resultShape)) {
+-    localMemStrides.push_back(localMemStrides.back() * size);
+-  }
+-  localMemStrides.pop_back();
+-
+-  std::reverse(localMemStrides.begin(), localMemStrides.end());
+-  bool isExtractedAttrInserted = false;
+-  for (const auto &[size, localMemStride] :
+-       llvm::zip_equal(resultShape, localMemStrides)) {
+-    // handle indirect dimension
+-    strides.push_back(rewriter.getIndexAttr(localMemStride));
+-    Value sizeVal =
+-        rewriter.create<arith::ConstantOp>(loc, rewriter.getIndexAttr(size));
+-    scf::ForOp forOp;
+-    if (isLoadLike) {
+-      forOp = rewriter.create<scf::ForOp>(loc, zeroIdx, sizeVal, oneIdx,
+-                                          ValueRange({iterArg}));
+-      if (!newOpResult) {
+-        newOpResult = forOp->getResult(0);
+-      } else {
+-        rewriter.create<scf::YieldOp>(loc, forOp->getResult(0));
+-      }
+-      iterArg = forOp.getRegionIterArg(0);
++  int currentDim = 0;
++  for (const auto &[dimFromShape, dimStructuredInfo] : llvm::reverse(llvm::zip_equal(ptrShape, structuredInfo))){ 
++    if (dimStructuredInfo) {
++      if (rewriteStructureDim(op, ptrType.getRank() - currentDim, ptrOffsetInfo, alloc, rewriter).failed()) return failure();
+     } else {
+-      forOp = rewriter.create<scf::ForOp>(loc, zeroIdx, sizeVal, oneIdx);
++      if (rewriteUnstructureDim(op, ptrType.getRank() - currentDim, ptrOffsetInfo, alloc, rewriter).failed()) return failure();
+     }
+-    offsets.push_back(forOp.getInductionVar());
+-    iterIdx.push_back(forOp.getInductionVar());
+-    forOp->setAttr("ExtractedLoadOrStore",
+-                   UnitAttr::get(rewriter.getContext()));
+-    rewriter.setInsertionPointToStart(forOp.getBody());
+-  }
+-
+-  auto scalarLikeShape = SmallVector<int64_t>(dims.size(), 1);
+-  auto scalarLikeType =
+-      RankedTensorType::get(scalarLikeShape, resultElementType);
+-
+-  auto extractedOffset = createExtractOp(loc, offset, iterIdx, rewriter);
+-  if (isa<RankedTensorType>(srcPtr.getType())) {
+-    srcPtr = createExtractOp(loc, srcPtr, iterIdx, rewriter);
++    currentDim++;
+   }
+-  Value ptrToAccess = rewriter.create<triton::AddPtrOp>(
+-      loc, srcPtr.getType(), srcPtr, extractedOffset);
+ 
+-  MemAccOpTy accessedValue =
+-      createMemAccOp(op, ptrToAccess, loc, iterIdx, rewriter);
+-  accessedValue->setAttr(ConverterUtils::discreteAttrName,
+-                         UnitAttr::get(rewriter.getContext()));
+-
+-  if (isLoadLike) {
+-    assert(iterArg && "Load case must have iterArg in for loop");
+-
+-    Value splatedValue = accessedValue->getResult(0);
+-    if (!isa<RankedTensorType>(splatedValue.getType())) {
+-      splatedValue =
+-          rewriter.create<triton::SplatOp>(loc, scalarLikeType, splatedValue);
+-    }
+-    auto result = rewriter.create<tensor::InsertSliceOp>(
+-        loc, splatedValue, iterArg, offsets, dims, strides);
+-    rewriter.create<scf::YieldOp>(loc, result->getResult(0))
+-        ->setAttr(ConverterUtils::discreteAttrName,
+-                  UnitAttr::get(rewriter.getContext()));
+-
+-    rewriter.restoreInsertionPoint(insertPoint);
+-    if constexpr (std::is_same_v<MemAccOpTy, triton::LoadOp>) {
+-      if (op.getMask() && op.getOther()) {
+-        rewriter
+-            .replaceOpWithNewOp<arith::SelectOp>(op, op.getMask(), newOpResult,
+-                                                 op.getOther())
+-            ->setAttr(ConverterUtils::discreteAttrName,
+-                      UnitAttr::get(rewriter.getContext()));
+-        ;
+-      } else {
+-        rewriter.replaceOp(op, newOpResult);
+-      }
+-    } else {
+-      rewriter.replaceOp(op, newOpResult);
+-    }
+-  } else {
+-    rewriter.eraseOp(op);
+-  }
+-  LLVM_DEBUG({
+-    auto &os = llvm::dbgs();
+-    os << "After conversion\n"
+-       << ptrToAccess.getDefiningOp()
+-              ->template getParentOfType<triton::FuncOp>()
+-       << "\n";
+-  });
+-  return success();
++ rewriter.restoreInsertionPoint(insertPoint);
++ return success();
++
++
++  // //Filttering dims
++  // for (const auto &[dimFromShape, dimStructuredInfo] : llvm::zip_equal(ptrShape, structuredInfo)){
++  //     if (dimStructuredInfo) { 
++  //       lastDimShape = dimFromShape;
++  //       break;
++  //     }
++  //     resultShape.push_back(dimFromShape);
++  // }
++   
++  // LLVM_DEBUG({
++  //   auto &os = llvm::dbgs();
++  //   os << "resultShape " << resultShape.size()<< "\n";
++  // });
++
++
++  // auto resultElementType =
++  //     cast<triton::PointerType>(ptrType.getElementType()).getPointeeType();
++
++  // Value iterArg = nullptr;
++
++  // // Only load case
++  // if (isLoadLike) {
++  //   iterArg =
++  //       rewriter.create<tensor::EmptyOp>(loc, resultShape, resultElementType);
++  // }
++  // Value newOpResult = nullptr;
++
++  // 
++
++  // SmallVector<OpFoldResult> dims(resultShape.size(), rewriter.getIndexAttr(1));
++  // SmallVector<OpFoldResult> offsets;
++  // SmallVector<OpFoldResult> strides;
++  // SmallVector<Value> iterIdx;
++
++  // SmallVector<int64_t> localMemStrides(1, 1);
++
++
++
++  // for (auto size : llvm::reverse(resultShape)) {
++  //   localMemStrides.push_back(localMemStrides.back() * size);
++  // }
++  // localMemStrides.pop_back();
++
++  // std::reverse(localMemStrides.begin(), localMemStrides.end());
++  // bool isExtractedAttrInserted = false;
++
++
++
++  // for (const auto &[size, localMemStride] :
++  //      llvm::zip_equal(resultShape, localMemStrides)) {
++  //   // handle indirect dimension
++
++  //   strides.push_back(rewriter.getIndexAttr(localMemStride));
++  //   Value sizeVal =
++  //       rewriter.create<arith::ConstantOp>(loc, rewriter.getIndexAttr(size));
++  //   scf::ForOp forOp;
++  //   if (isLoadLike) {
++  //     forOp = rewriter.create<scf::ForOp>(loc, zeroIdx, sizeVal, oneIdx,
++  //                                         ValueRange({iterArg}));
++  //     if (!newOpResult) {
++  //       newOpResult = forOp->getResult(0);
++  //     } else {
++  //       rewriter.create<scf::YieldOp>(loc, forOp->getResult(0));
++  //     }
++  //     iterArg = forOp.getRegionIterArg(0);
++  //   } else {
++  //     forOp = rewriter.create<scf::ForOp>(loc, zeroIdx, sizeVal, oneIdx);
++  //   }
++  //   offsets.push_back(forOp.getInductionVar());
++  //   iterIdx.push_back(forOp.getInductionVar());
++  //   forOp->setAttr("ExtractedLoadOrStore",
++  //                  UnitAttr::get(rewriter.getContext()));
++  //   rewriter.setInsertionPointToStart(forOp.getBody());
++  
++  // }
++
++  // auto scalarLikeShape = SmallVector<int64_t>(dims.size(), lastDimShape);
++  // auto scalarLikeType =
++  //     RankedTensorType::get(scalarLikeShape, resultElementType);
++
++  // auto extractedOffset = createExtractOp(loc, offset, iterIdx, rewriter);
++
++  // if (isa<RankedTensorType>(srcPtr.getType())) {
++  //   srcPtr = createExtractOp(loc, srcPtr, iterIdx, rewriter);
++  // }
++  // Value ptrToAccess = rewriter.create<triton::AddPtrOp>(
++  //     loc, srcPtr.getType(), srcPtr, extractedOffset);
++
++  // MemAccOpTy accessedValue =
++  //     createMemAccOp(op, ptrToAccess, loc, iterIdx, rewriter);
++  // accessedValue->setAttr(ConverterUtils::discreteAttrName,
++  //                        UnitAttr::get(rewriter.getContext()));
++
++  // if (isLoadLike) {
++  //   assert(iterArg && "Load case must have iterArg in for loop");
++
++  //   Value splatedValue = accessedValue->getResult(0);
++  //   if (!isa<RankedTensorType>(splatedValue.getType())) {
++  //     splatedValue =
++  //         rewriter.create<triton::SplatOp>(loc, scalarLikeType, splatedValue);
++  //   }
++  //   auto result = rewriter.create<tensor::InsertSliceOp>(
++  //       loc, splatedValue, iterArg, offsets, dims, strides);
++  //   rewriter.create<scf::YieldOp>(loc, result->getResult(0))
++  //       ->setAttr(ConverterUtils::discreteAttrName,
++  //                 UnitAttr::get(rewriter.getContext()));
++
++  //   rewriter.restoreInsertionPoint(insertPoint);
++  //   if constexpr (std::is_same_v<MemAccOpTy, triton::LoadOp>) {
++  //     if (op.getMask() && op.getOther()) {
++  //       rewriter
++  //           .replaceOpWithNewOp<arith::SelectOp>(op, op.getMask(), newOpResult,
++  //                                                op.getOther())
++  //           ->setAttr(ConverterUtils::discreteAttrName,
++  //                     UnitAttr::get(rewriter.getContext()));
++  //       ;
++  //     } else {
++  //       rewriter.replaceOp(op, newOpResult);
++  //     }
++  //   } else {
++  //     rewriter.replaceOp(op, newOpResult);
++  //   }
++  // } else {
++  //   rewriter.eraseOp(op);
++  // }
++  // LLVM_DEBUG({
++  //   auto &os = llvm::dbgs();
++  //   os << "KMLOG After conversion\n"
++  //      << ptrToAccess.getDefiningOp()
++  //             ->template getParentOfType<triton::FuncOp>()
++  //      << "\n";
++  // });
++  // return success();
+ }
+ 
+ void exchangeValueWithOffset(Value value, Value ptr, const Location &loc,
+@@ -389,9 +579,31 @@ void TritonToUnstructurePass::runParse(MemAccOpTy op) {
+   IRRewriter rewriter(&getContext());
+   LLVM_DEBUG({
+     auto &os = llvm::dbgs();
+-    os << "Parsing " << op->getName() << "\n" << op << "\n";
++
++    os << op.getPtr().getDefiningOp()
++              ->template getParentOfType<triton::FuncOp>()
++       << "\n";
++   os << "========================================================\n";
++   os << "KMLOG Parsing " << op->getName() << " " << op;   
+   });
++
+   parse(op.getPtr(), op.getLoc(), rewriter, offsetMap);
++
++  LLVM_DEBUG({
++    auto &os = llvm::dbgs();
++    os << "KMLOG Parsing done for: "<< op << "\n";
++    if (isa<triton::LoadOp>(op)) {
++    auto data = offsetMap.at(op.getPtr());
++      os << "[ ";
++      std::string sep =" ";
++      for (auto s : data.getStructuredRef()) {
++        os << sep;
++        os << s;
++        sep = "x";
++      }
++      os << "]\n";
++    }
++  });
+ }
+ 
+ void TritonToUnstructurePass::runOnOperation() {
+@@ -411,6 +623,11 @@ void TritonToUnstructurePass::runOnOperation() {
+     }
+   });
+ 
++  LLVM_DEBUG({
++    auto &os = llvm::dbgs();
++    os << "KMLOG All parsing done\n";
++  });
++
+   RewritePatternSet patterns(ctx);
+ 
+   patterns.add<UnstructuredMemAccessConverter<triton::LoadOp>,
